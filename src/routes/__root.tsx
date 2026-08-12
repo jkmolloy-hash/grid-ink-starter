@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Grid and Ink Shop" },
+      { name: "description", content: "A curated print and paper goods shop." },
+      { name: "author", content: "Grid and Ink Shop" },
+      { property: "og:title", content: "Grid and Ink Shop" },
+      { property: "og:description", content: "A curated print and paper goods shop." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@gridandink" },
     ],
     links: [
       {
@@ -114,13 +114,37 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function Header() {
+  return (
+    <header className="border-b border-border bg-background">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+        <Link to="/" className="text-lg font-semibold tracking-tight text-foreground">
+          Grid and Ink Shop
+        </Link>
+        <nav className="flex items-center gap-4 text-sm font-medium text-muted-foreground">
+          <Link to="/" activeProps={{ className: "text-foreground" }}>
+            Home
+          </Link>
+          <Link to="/shop" activeProps={{ className: "text-foreground" }}>
+            Shop
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="flex min-h-screen flex-col bg-background">
+        <Header />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
     </QueryClientProvider>
   );
 }
