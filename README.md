@@ -1,4 +1,4 @@
-# Grid & Ink Starter
+Grid & Ink Co. storefront.
 
 "Create a blank Vite + React + TypeScript + Tailwind app called
    Grid and Ink Shop, using react-router-dom for pages and
