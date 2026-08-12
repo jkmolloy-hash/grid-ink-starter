@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-bench text-ink font-sans antialiased; }
+
+.caption { @apply font-mono text-[11px] tracking-[0.14em] uppercase text-note; }
+
+.btn-ink {
+  @apply inline-flex items-center justify-center gap-2 bg-ink text-paper
+         font-semibold px-6 py-3 rounded-md transition
+         hover:bg-[#0a3560] disabled:opacity-40 disabled:cursor-not-allowed;
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 border border-ink/20
+         text-ink font-semibold px-6 py-3 rounded-md transition
+         hover:border-ink hover:bg-paper;
+}
+.field {
+  @apply w-full rounded-md border border-ink/15 bg-paper px-3 py-2
+         focus:outline-none focus:ring-2 focus:ring-ink/30;
+}
+
+/* ---- the logo plots itself ---------------------------------------- */
+@keyframes plot-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .plot-stroke { animation: none !important; stroke-dashoffset: 0 !important; }
+}
+
+/* ---- Ken Burns: the room breathes ---------------------------------- */
+@keyframes kb-in  { from { transform: scale(1.02); } to { transform: scale(1.10); } }
+@keyframes kb-out { from { transform: scale(1.10); } to { transform: scale(1.02); } }
+.kb-in  { animation: kb-in 9s ease-out forwards; }
+.kb-out { animation: kb-out 9s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .kb-in, .kb-out { animation: none; transform: none; }
+}

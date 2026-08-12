@@ -1,1 +1,2 @@
-project_id = "vmguoqimtnbhtbyjmrud"
+[functions.stripe-webhook]
+verify_jwt = false
