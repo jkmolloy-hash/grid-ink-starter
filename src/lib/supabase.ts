@@ -3,7 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 /* Lovable injects these automatically once you connect Supabase in
    the Lovable project settings; nothing to edit here. */
 const url = import.meta.env.VITE_SUPABASE_URL as string;
-const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+// Accept either key name: our original, or the one Lovable's scaffold
+// writes (Supabase's newer "publishable" naming). Same key class —
+// public by design, guarded by row-level security.
+const anon = (import.meta.env.VITE_SUPABASE_ANON_KEY
+  ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) as string;
 
 if (!url || !anon) {
   // Never white-screen the storefront over configuration: browsing must
