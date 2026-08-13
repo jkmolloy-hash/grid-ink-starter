@@ -111,7 +111,8 @@ export default function Create() {
               <span className="font-semibold text-center">Drop a photo here, or click to choose</span>
               <span className="caption text-center opacity-80">
                 Best at 1500&nbsp;px or larger on the short side
-                (any recent phone photo)
+                (any recent phone photo).<br />
+                Avoid distant or full-frame full-field images.
               </span>
               <input type="file" accept="image/*" className="hidden"
                      onChange={e => onFile(e.target.files?.[0])} />
