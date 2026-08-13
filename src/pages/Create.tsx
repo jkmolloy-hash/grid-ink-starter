@@ -24,6 +24,7 @@ export default function Create() {
   const [cityName, setCityName] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
+  const [lowRes, setLowRes] = useState<null | { w: number; h: number }>(null);
   const [err, setErr] = useState("");
 
   const money = (c: number) =>
@@ -38,7 +39,12 @@ export default function Create() {
     if (!f.type.startsWith("image/")) { setErr("Please choose an image file."); return; }
     setErr(""); fileRef.current = f;
     const img = new Image();
-    img.onload = () => { imgRef.current = img; setHasPhoto(true); render(); };
+    img.onload = () => {
+      imgRef.current = img;
+      setLowRes(Math.min(img.naturalWidth, img.naturalHeight) < 1200
+        ? { w: img.naturalWidth, h: img.naturalHeight } : null);
+      setHasPhoto(true); render();
+    };
     img.src = URL.createObjectURL(f);
   }
 
@@ -103,7 +109,14 @@ export default function Create() {
                    onDrop={e => { e.preventDefault(); onFile(e.dataTransfer.files?.[0]); }}>
               <span className="text-4xl">&#8679;</span>
               <span className="font-semibold">Drop a photo here, or click to choose</span>
-              <span className="caption">Action shots and portraits both work</span>
+              <span className="caption text-center px-6">
+                Fill the frame with the athlete &mdash; action or posed both
+                work. Skip distant, full-field shots.
+              </span>
+              <span className="caption opacity-80">
+                Best at 1500&nbsp;px or larger on the short side
+                (any recent phone photo)
+              </span>
               <input type="file" accept="image/*" className="hidden"
                      onChange={e => onFile(e.target.files?.[0])} />
             </label>
@@ -111,6 +124,14 @@ export default function Create() {
             <>
               <canvas ref={canvasRef}
                       className="w-full max-w-md rounded-md shadow-sheet border border-ink/10" />
+              {lowRes && (
+                <p className="caption mt-3 text-center max-w-md"
+                   style={{ color: "#b45309" }}>
+                  This photo is {lowRes.w}&times;{lowRes.h}px &mdash; on the
+                  small side. It will still plot, but a larger original keeps
+                  the line detail crisp.
+                </p>
+              )}
               <label className="caption mt-4 cursor-pointer hover:text-ink">
                 Use a different photo
                 <input type="file" accept="image/*" className="hidden"

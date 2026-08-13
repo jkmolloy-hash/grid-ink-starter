@@ -18,18 +18,38 @@ type Slide = {
   kicker: string; head: [string, string];
   cta?: { to: string; label: string };
   ghost?: { href: string; label: string };
+  sub?: string;
 };
 
 const SLIDES: Slide[] = [
-  { kind: "art", img: "/gallery/sports-hero.jpg",
-    alt: "Hand-plotted sports portrait, framed",
+  { kind: "art", img: "/gallery/hero-basketball.jpg",
+    alt: "Hand-plotted basketball portrait, Eagles 14, framed",
     wall: "radial-gradient(120% 90% at 30% 20%, #f3f0ea 0%, #e7e3da 55%, #d8d3c8 100%)",
     zoom: "kb-in", tone: "light",
     kicker: "Senior season, drawn",
-    head: ["Every athlete.", "One unbroken line."],
+    head: ["Every athlete.", "One of one."],
+    sub: "Every line is unique to your piece — there is no duplication.",
     cta: { to: "/create?product=sports",
            label: `Start a portrait — ${money(PRODUCTS.sports.priceCents)}` },
     ghost: { href: "#how", label: "How it works" } },
+  { kind: "art", img: "/gallery/hero-baseball.jpg",
+    alt: "Hand-plotted baseball swing with drawn stat block and mascot, framed",
+    wall: "radial-gradient(120% 90% at 65% 18%, #eef2f6 0%, #dde5ec 55%, #cbd6e0 100%)",
+    zoom: "kb-out", tone: "light",
+    kicker: "Stats, mascot & name — drawn in",
+    head: ["Their whole season,", "in ink."],
+    cta: { to: "/create?product=sports",
+           label: `Start a portrait — ${money(PRODUCTS.sports.priceCents)}` },
+    ghost: { href: "#how", label: "How it works" } },
+  { kind: "art", img: "/gallery/hero-football.jpg",
+    alt: "Hand-plotted football portrait, 14U League MVP, framed",
+    wall: "radial-gradient(120% 90% at 40% 15%, #f2efe9 0%, #e6e1d7 55%, #d6d0c4 100%)",
+    zoom: "kb-in", tone: "light",
+    kicker: "From your photo",
+    head: ["Plotted once.", "Signed by hand."],
+    cta: { to: "/create?product=sports",
+           label: `Start a portrait — ${money(PRODUCTS.sports.priceCents)}` },
+    ghost: { href: "#how", label: "See the process" } },
   { kind: "art", img: "/gallery/map-austin.png",
     alt: "Navy plotted city map of Austin, framed",
     wall: "radial-gradient(120% 90% at 70% 15%, #eef1f5 0%, #dfe4ea 55%, #ccd3dc 100%)",
@@ -111,6 +131,13 @@ export default function HeroCarousel() {
               <h2 className="font-display text-3xl sm:text-5xl font-bold leading-[1.05] mt-2">
                 {s.head[0]}<br />{s.head[1]}
               </h2>
+              {s.sub && (
+                <p className={"mt-3 max-w-xl text-base sm:text-lg " +
+                              (s.tone === "dark"
+                                ? "text-paper/80" : "text-ink/75")}>
+                  {s.sub}
+                </p>
+              )}
               <div className="mt-6 flex flex-wrap items-center gap-4">
                 {s.cta && (
                   <Link to={s.cta.to} className="btn-ink shadow-sheet">

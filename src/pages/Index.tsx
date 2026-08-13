@@ -41,18 +41,18 @@ export default function Index() {
       <section className="bg-ink text-paper">
         <div className="max-w-6xl mx-auto px-5 py-16 grid lg:grid-cols-2 gap-12 items-center">
           <img src="/gallery/sports-example.jpg"
-               alt="Hand-plotted sports portrait — one continuous line"
+               alt="Hand-plotted sports portrait in the single-line style"
                className="rounded-md w-full max-w-md mx-auto ring-1 ring-paper/20" />
           <div>
             <div className="caption !text-paper/60 mb-3">A finished piece</div>
             <h2 className="font-display text-3xl font-bold leading-tight">
-              The pen never lifts<br />inside the figure.
+              Every piece<br />is one of one.
             </h2>
             <ul className="mt-6 space-y-2 font-mono text-sm text-paper/85">
               <li>12&quot; &times; 18&quot; &middot; archival paper</li>
-              <li>0.5 mm technical pen &middot; single line</li>
+              <li>0.5 mm technical pen &middot; one continuous meander</li>
               <li>Name, school &amp; year in drawn lettering</li>
-              <li>Every piece plotted to order</li>
+              <li>Plotted once &middot; signed by hand &middot; never reprinted</li>
             </ul>
             <Link to="/create?product=sports"
                   className="inline-flex mt-8 items-center justify-center gap-2 border border-paper/40 text-paper font-semibold px-6 py-3 rounded-md transition hover:bg-paper hover:text-ink">
