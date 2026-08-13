@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
 import { drawLinePreview } from "@/lib/preview";
-import { PRODUCTS, TURNAROUND, type ProductKey } from "@/config";
+import { PRODUCTS, type ProductKey } from "@/config";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
