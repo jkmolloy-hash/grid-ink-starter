@@ -2,13 +2,40 @@ import { useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
-import { drawLinePreview } from "@/lib/preview";
-import { PRODUCTS, TURNAROUND, type ProductKey } from "@/config";
+import Mockup, { DEFAULT_LAYOUT, type Layout } from "@/components/Mockup";
+import MapPicker, { type MapFrame } from "@/components/MapPicker";
+import { PRODUCTS, TURNAROUND, type ProductKey, BRAND } from "@/config";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
    city   — name the place; we plot from real street data and email a
             proof before pen touches paper. */
+const INKS: [string, string][] = [
+  ["Blue", "#082b4a"], ["Black", "#111111"], ["Green", "#0e7a5f"],
+  ["Gold", "#c9a227"], ["Red", "#c1121f"],
+];
+
+function InkRow({ label, value, onPick }:
+  { label: string; value: string; onPick: (c: string) => void }) {
+  return (
+    <div className="mt-3 flex items-center gap-3">
+      <span className="caption w-24">{label}</span>
+      <div className="flex gap-2">
+        {INKS.map(([name, hex]) => (
+          <button key={hex} type="button" title={name}
+                  aria-label={name + " ink"}
+                  onClick={() => onPick(hex)}
+                  className={"h-7 w-7 rounded border-2 transition "
+                    + (value === hex
+                       ? "border-ink ring-2 ring-ink/30 scale-110"
+                       : "border-ink/20 hover:border-ink/60")}
+                  style={{ background: hex }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Create() {
   const session = useSession();
   const nav = useNavigate();
@@ -16,8 +43,6 @@ export default function Create() {
   const key: ProductKey = params.get("product") === "city" ? "city" : "sports";
   const product = PRODUCTS[key];
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
   const fileRef = useRef<File | null>(null);
   const [hasPhoto, setHasPhoto] = useState(false);
   const [athlete, setAthlete] = useState("");
@@ -29,25 +54,30 @@ export default function Create() {
   const logoRef = useRef<File | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [logoName, setLogoName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [colorMode, setColorMode] = useState<"single" | "two">("single");
+  const [inkArt, setInkArt] = useState("#082b4a");
+  const [inkText, setInkText] = useState("#082b4a");
+  const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
+  const frameRef = useRef<(() => MapFrame) | null>(null);
+  const [fly, setFly] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoNote, setGeoNote] = useState("");
   const [err, setErr] = useState("");
 
   const money = (c: number) =>
     (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-  function render() {
-    if (imgRef.current && canvasRef.current)
-      drawLinePreview(canvasRef.current, imgRef.current, athlete);
-  }
   function onFile(f: File | undefined | null) {
     if (!f) return;
     if (!f.type.startsWith("image/")) { setErr("Please choose an image file."); return; }
     setErr(""); fileRef.current = f;
     const img = new Image();
     img.onload = () => {
-      imgRef.current = img;
       setLowRes(Math.min(img.naturalWidth, img.naturalHeight) < 1200
         ? { w: img.naturalWidth, h: img.naturalHeight } : null);
-      setHasPhoto(true); render();
+      setPhotoUrl(img.src);
+      setHasPhoto(true);
     };
     img.src = URL.createObjectURL(f);
   }
@@ -60,6 +90,23 @@ export default function Create() {
   }
   function clearLogo() {
     logoRef.current = null; setLogoUrl(""); setLogoName("");
+  }
+
+  async function findPlace() {
+    const q = cityName.trim();
+    if (q.length < 2) return;
+    setGeoBusy(true); setGeoNote("");
+    try {
+      const r = await fetch("https://photon.komoot.io/api/?limit=1&q="
+                            + encodeURIComponent(q));
+      const j = await r.json();
+      const c = j?.features?.[0]?.geometry?.coordinates;
+      if (c) setFly({ lat: c[1], lng: c[0] });
+      else setGeoNote("Couldn't find that place — try adding the state.");
+    } catch {
+      setGeoNote("Couldn't reach the place search — pan the map by hand.");
+    }
+    setGeoBusy(false);
   }
 
   const ready = key === "sports" ? hasPhoto : cityName.trim().length > 1;
@@ -79,6 +126,16 @@ export default function Create() {
         shipping_options: product.shippingOptions,
         athlete_name: key === "sports" ? (athlete || null) : null,
         line2: key === "sports" ? (line2.trim() || null) : null,
+        color_mode: key === "sports" ? colorMode : null,
+        ink_art: key === "sports" ? (colorMode === "two" ? inkArt : inkText) : null,
+        ink_text: key === "sports" ? inkText : null,
+        layout: key === "sports" ? layout : null,
+        map_frame: key === "city" && frameRef.current
+          ? { v: 2, ...(() => { const f = frameRef.current!();
+              return { bbox: f.bbox, center: f.center, zoom: f.zoom }; })(),
+              orientation: "portrait", title: cityName.trim(),
+              variant: "white-on-navy" }
+          : null,
         city_name: key === "city" ? cityName : null,
         notes: notes || null,
         status: "pending_payment",
@@ -135,12 +192,12 @@ export default function Create() {
                    onDragOver={e => e.preventDefault()}
                    onDrop={e => { e.preventDefault(); onFile(e.dataTransfer.files?.[0]); }}>
               <span className="text-4xl">&#8679;</span>
-              <span className="font-semibold">Drop a photo here, or click to choose</span>
+              <span className="font-semibold text-center px-4">Drop a photo here, or click to choose</span>
               <span className="caption text-center px-6">
                 Fill the frame with the athlete &mdash; action or posed both
                 work. Skip distant, full-field shots.
               </span>
-              <span className="caption opacity-80">
+              <span className="caption opacity-80 text-center px-6">
                 Best at 1500&nbsp;px or larger on the short side
                 (any recent phone photo)
               </span>
@@ -149,8 +206,16 @@ export default function Create() {
             </label>
           ) : (
             <>
-              <canvas ref={canvasRef}
-                      className="w-full max-w-md rounded-md shadow-sheet border border-ink/10" />
+              <Mockup photoUrl={photoUrl} name={athlete} line2={line2}
+                      logoUrl={logoUrl}
+                      inkArt={colorMode === "two" ? inkArt : inkText}
+                      inkText={inkText}
+                      layout={layout} onLayout={setLayout} />
+              <p className="caption mt-3 text-center max-w-md">
+                Layout preview &mdash; drag the name, line and logo where you
+                want them. The finished piece is hand-plotted line art, drawn
+                from this photo.
+              </p>
               {lowRes && (
                 <p className="caption mt-3 text-center max-w-md"
                    style={{ color: "#b45309" }}>
@@ -167,21 +232,14 @@ export default function Create() {
             </>
           )
         ) : (
-          <div className="w-full max-w-md aspect-[4/5] bg-paper rounded-md shadow-sheet
-                          border border-ink/10 p-8 flex flex-col justify-between">
-            <div className="caption">City map art &middot; {PRODUCTS.city.size}</div>
-            <div>
-              <div className="text-3xl font-extrabold tracking-tight">
-                {cityName.trim() ? cityName.toUpperCase() : "YOUR CITY"}
-              </div>
-              <p className="mt-3 text-ink/70">
-                Plotted from real street data in the Grid &amp; Ink blueprint
-                style. We email you the exact proof for approval before the
-                pen touches paper.
-              </p>
-            </div>
-            <img src="/logo.png" alt="" className="w-20 rounded-md self-end
-                                                   border border-ink/20" />
+          <div className="flex flex-col items-center">
+            <MapPicker frameRef={frameRef} fly={fly} title={cityName} />
+            <p className="caption mt-3 text-center max-w-md">
+              Search your place, then drag and zoom until the frame holds
+              exactly the streets you want &mdash; the finished piece is
+              plotted from real street data in white ink on deep navy
+              stock.
+            </p>
           </div>
         )}
       </div>
@@ -191,7 +249,7 @@ export default function Create() {
         <div className="caption">Your piece</div>
         <h1 className="text-xl font-extrabold mt-1">{product.name}</h1>
         <div className="caption mt-1">
-          {product.size} &middot; navy ink &middot; {product.framed ? "framed" : "secure tube"}
+          {product.size} &middot; {product.inkLabel} &middot; {product.framed ? "framed" : "secure tube"}
         </div>
 
         {key === "sports" ? (
@@ -200,8 +258,7 @@ export default function Create() {
             <input className="field mt-1" placeholder="e.g. TOM KID"
                    maxLength={24}
                    value={athlete}
-                   onChange={e => setAthlete(e.target.value)}
-                   onBlur={render} />
+                   onChange={e => setAthlete(e.target.value)} />
             <span className="caption block text-right mt-1">
               {athlete.length}/24
             </span>
@@ -248,14 +305,49 @@ export default function Create() {
               </div>
             )}
           </div>
+          <div className="mt-5">
+            <div className="font-semibold text-sm">Ink colors</div>
+            <div className="mt-2 flex gap-2">
+              {(["single", "two"] as const).map(m => (
+                <button key={m} type="button"
+                        onClick={() => { setColorMode(m);
+                          if (m === "single") setInkArt(inkText); }}
+                        className={"px-3 py-1.5 rounded-md border text-sm font-semibold transition "
+                          + (colorMode === m
+                             ? "border-ink bg-ink text-paper"
+                             : "border-ink/25 hover:border-ink")}>
+                  {m === "single" ? "One color" : "Two colors"}
+                </button>
+              ))}
+            </div>
+            <InkRow label={colorMode === "two"
+                            ? "Text & logo" : "Everything"}
+                    value={inkText}
+                    onPick={c => { setInkText(c);
+                      if (colorMode === "single") setInkArt(c); }} />
+            {colorMode === "two" && (
+              <InkRow label="Artwork" value={inkArt} onPick={setInkArt} />
+            )}
+          </div>
           </>
         ) : (
           <>
             <label className="block mt-6 font-semibold text-sm">City or place
               <input className="field mt-1" placeholder="e.g. Austin, Texas"
                      value={cityName}
-                     onChange={e => setCityName(e.target.value)} />
+                     onChange={e => setCityName(e.target.value)}
+                     onKeyDown={e => { if (e.key === "Enter") findPlace(); }} />
             </label>
+            <button type="button" className="btn-ink mt-3 !py-2 text-sm"
+                    disabled={geoBusy || cityName.trim().length < 2}
+                    onClick={findPlace}>
+              {geoBusy ? "Finding…" : "Find it on the map"}
+            </button>
+            {geoNote && <p className="caption mt-2">{geoNote}</p>}
+            <p className="caption mt-3">
+              Drawn as your title on the piece &middot; white ink on deep
+              navy stock
+            </p>
             <label className="block mt-4 font-semibold text-sm">
               Anything special? <span className="caption font-normal">(optional)</span>
               <input className="field mt-1"
@@ -271,7 +363,12 @@ export default function Create() {
           </div>
           <div className="flex justify-between text-sm text-ink/70">
             <span>Shipping &mdash; {product.framed ? "framed flat pack" : "secure tube"}</span>
-            <span>{money(product.shippingCents)}</span>
+            <span>Included</span>
+          </div>
+          <div className="caption">
+            US shipping only &middot; international assessed per order
+            &mdash; <a className="underline"
+                       href={"mailto:" + BRAND.email}>email us first</a>
           </div>
           <div className="flex justify-between font-extrabold text-lg pt-2">
             <span>Total</span>
