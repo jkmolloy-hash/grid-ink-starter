@@ -81,12 +81,12 @@ export default function HeroCarousel() {
              aria-roledescription="carousel">
       {SLIDES.map((s, i) => (
         <div key={i}
-             className={"absolute inset-0 transition-opacity duration-1000 " +
+             className={"absolute inset-0 transition-opacity duration-700 ease-in-out " +
                         (active === i ? "opacity-100" : "opacity-0 pointer-events-none")}
              aria-hidden={active !== i}>
           {s.kind === "art" ? (
             <div key={`${i}-${active === i}`}
-                 className={"absolute inset-0 " + (active === i ? s.zoom : "")}
+                 className={"absolute inset-0 " + (s.zoom ?? "")}
                  style={{ background: s.wall }}>
               {/* plaster grain */}
               <svg className="absolute inset-0 h-full w-full opacity-[0.05] mix-blend-multiply"

@@ -81,21 +81,27 @@ export default function MapPicker({ frameRef, fly, title }: Props) {
       <div ref={divRef}
            className="w-full aspect-[4/5] rounded-md shadow-sheet
                       border border-ink/10 overflow-hidden bg-[#082b4a]" />
+      {/* blueprint blue: screen-blend turns black to navy, keeps white white */}
+      <div className="pointer-events-none absolute inset-0 z-[400]
+                      mix-blend-screen rounded-md"
+           style={{ background: "#082b4a" }} />
       {/* the drawn frame — what's inside this line is the piece */}
       <div className="pointer-events-none absolute inset-3 rounded-sm
                       border-2 border-paper/85 z-[500]" />
       {showFurniture && (
         <>
-          {/* north arrow */}
-          <svg viewBox="0 0 24 40" aria-hidden="true"
+          {/* north arrow — drawn the way the pen draws it: strokes only */}
+          <svg viewBox="0 0 24 46" aria-hidden="true" fill="none"
                className="pointer-events-none absolute top-6 right-6 w-5
-                          text-paper/85 z-[500]">
-            <path d="M12 4 L16 14 L12 11 L8 14 Z" fill="currentColor" />
-            <line x1="12" y1="11" x2="12" y2="26"
-                  stroke="currentColor" strokeWidth="1.4" />
-            <text x="12" y="38" textAnchor="middle" fontSize="10"
-                  fontFamily="IBM Plex Mono, monospace"
-                  fill="currentColor">N</text>
+                          text-paper/90 z-[500]">
+            <path d="M8 14 L8 3 L16 14 L16 3" stroke="currentColor"
+                  strokeWidth="1.6" strokeLinecap="round"
+                  strokeLinejoin="round" />
+            <line x1="12" y1="20" x2="12" y2="42" stroke="currentColor"
+                  strokeWidth="1.6" strokeLinecap="round" />
+            <path d="M7 27 L12 20 L17 27" stroke="currentColor"
+                  strokeWidth="1.6" strokeLinecap="round"
+                  strokeLinejoin="round" />
           </svg>
           {/* the poster furniture: title + live coordinates */}
           <div className="pointer-events-none absolute inset-x-0 bottom-7
