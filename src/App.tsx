@@ -8,6 +8,7 @@ import Index from "@/pages/Index";
 import Create from "@/pages/Create";
 import Auth from "@/pages/Auth";
 import Account from "@/pages/Account";
+import Studio from "@/pages/Studio";
 
 const SessionCtx = createContext<Session | null>(null);
 export const useSession = () => useContext(SessionCtx);
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/create" element={<Create />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/studio" element={<Studio />} />
           </Routes>
         </main>
         <Footer />

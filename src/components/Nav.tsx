@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
@@ -6,6 +7,11 @@ import { BRAND } from "@/config";
 export default function Nav() {
   const session = useSession();
   const nav = useNavigate();
+  const [studio, setStudio] = useState(false);
+  useEffect(() => {
+    if (!session) { setStudio(false); return; }
+    supabase.rpc("is_studio").then(r => setStudio(!!r.data));
+  }, [session]);
   return (
     <>
     <div className="bg-ink text-paper">
@@ -29,6 +35,12 @@ export default function Nav() {
           <Link to="/create" className="font-semibold hover:underline underline-offset-4">
             Create yours
           </Link>
+          {studio && (
+            <Link to="/studio"
+                  className="font-semibold hover:underline underline-offset-4">
+              Studio
+            </Link>
+          )}
           {session ? (
             <>
               <Link to="/account" className="font-semibold hover:underline underline-offset-4">
