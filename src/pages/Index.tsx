@@ -85,7 +85,9 @@ export default function Index() {
               <div className="mt-6 flex items-center justify-between">
                 <div>
                   <div className="font-mono text-2xl font-semibold">{money(p.priceCents)}</div>
-                  <div className="caption">+ shipping from {money(p.shippingCents)}</div>
+                  <div className="caption">
+                    {p.shippingCents === 0 ? "Shipping included" : `+ shipping from ${money(p.shippingCents)}`}
+                  </div>
                 </div>
                 <Link to={`/create?product=${key}`} className="btn-ink">
                   {key === "sports" ? "Start your portrait" : "Map your place"}
