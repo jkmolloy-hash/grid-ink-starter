@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
 import Mockup, { DEFAULT_LAYOUT, type Layout } from "@/components/Mockup";
+import MapPicker, { type MapFrame } from "@/components/MapPicker";
 import { PRODUCTS, TURNAROUND, type ProductKey, BRAND } from "@/config";
 
 /* One page, two flows:
@@ -58,6 +59,10 @@ export default function Create() {
   const [inkArt, setInkArt] = useState("#082b4a");
   const [inkText, setInkText] = useState("#082b4a");
   const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
+  const frameRef = useRef<(() => MapFrame) | null>(null);
+  const [fly, setFly] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoNote, setGeoNote] = useState("");
   const [err, setErr] = useState("");
 
   const money = (c: number) =>
@@ -87,6 +92,23 @@ export default function Create() {
     logoRef.current = null; setLogoUrl(""); setLogoName("");
   }
 
+  async function findPlace() {
+    const q = cityName.trim();
+    if (q.length < 2) return;
+    setGeoBusy(true); setGeoNote("");
+    try {
+      const r = await fetch("https://photon.komoot.io/api/?limit=1&q="
+                            + encodeURIComponent(q));
+      const j = await r.json();
+      const c = j?.features?.[0]?.geometry?.coordinates;
+      if (c) setFly({ lat: c[1], lng: c[0] });
+      else setGeoNote("Couldn't find that place — try adding the state.");
+    } catch {
+      setGeoNote("Couldn't reach the place search — pan the map by hand.");
+    }
+    setGeoBusy(false);
+  }
+
   const ready = key === "sports" ? hasPhoto : cityName.trim().length > 1;
 
   async function checkout() {
@@ -108,6 +130,12 @@ export default function Create() {
         ink_art: key === "sports" ? (colorMode === "two" ? inkArt : inkText) : null,
         ink_text: key === "sports" ? inkText : null,
         layout: key === "sports" ? layout : null,
+        map_frame: key === "city" && frameRef.current
+          ? { v: 2, ...(() => { const f = frameRef.current!();
+              return { bbox: f.bbox, center: f.center, zoom: f.zoom }; })(),
+              orientation: "portrait", title: cityName.trim(),
+              variant: "white-on-navy" }
+          : null,
         city_name: key === "city" ? cityName : null,
         notes: notes || null,
         status: "pending_payment",
@@ -204,21 +232,14 @@ export default function Create() {
             </>
           )
         ) : (
-          <div className="w-full max-w-md aspect-[4/5] bg-paper rounded-md shadow-sheet
-                          border border-ink/10 p-8 flex flex-col justify-between">
-            <div className="caption">City map art &middot; {PRODUCTS.city.size}</div>
-            <div>
-              <div className="text-3xl font-extrabold tracking-tight">
-                {cityName.trim() ? cityName.toUpperCase() : "YOUR CITY"}
-              </div>
-              <p className="mt-3 text-ink/70">
-                Plotted from real street data in the Grid &amp; Ink blueprint
-                style. We email you the exact proof for approval before the
-                pen touches paper.
-              </p>
-            </div>
-            <img src="/logo.png" alt="" className="w-20 rounded-md self-end
-                                                   border border-ink/20" />
+          <div className="flex flex-col items-center">
+            <MapPicker frameRef={frameRef} fly={fly} />
+            <p className="caption mt-3 text-center max-w-md">
+              Search your place, then drag and zoom until the frame holds
+              exactly the streets you want &mdash; the finished piece is
+              plotted from real street data in white ink on deep navy
+              stock.
+            </p>
           </div>
         )}
       </div>
@@ -228,7 +249,7 @@ export default function Create() {
         <div className="caption">Your piece</div>
         <h1 className="text-xl font-extrabold mt-1">{product.name}</h1>
         <div className="caption mt-1">
-          {product.size} &middot; navy ink &middot; {product.framed ? "framed" : "secure tube"}
+          {product.size} &middot; {product.inkLabel} &middot; {product.framed ? "framed" : "secure tube"}
         </div>
 
         {key === "sports" ? (
@@ -314,8 +335,19 @@ export default function Create() {
             <label className="block mt-6 font-semibold text-sm">City or place
               <input className="field mt-1" placeholder="e.g. Austin, Texas"
                      value={cityName}
-                     onChange={e => setCityName(e.target.value)} />
+                     onChange={e => setCityName(e.target.value)}
+                     onKeyDown={e => { if (e.key === "Enter") findPlace(); }} />
             </label>
+            <button type="button" className="btn-ink mt-3 !py-2 text-sm"
+                    disabled={geoBusy || cityName.trim().length < 2}
+                    onClick={findPlace}>
+              {geoBusy ? "Finding…" : "Find it on the map"}
+            </button>
+            {geoNote && <p className="caption mt-2">{geoNote}</p>}
+            <p className="caption mt-3">
+              Drawn as your title on the piece &middot; white ink on deep
+              navy stock
+            </p>
             <label className="block mt-4 font-semibold text-sm">
               Anything special? <span className="caption font-normal">(optional)</span>
               <input className="field mt-1"

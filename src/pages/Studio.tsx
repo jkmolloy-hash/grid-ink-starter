@@ -6,6 +6,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { useSession } from "@/App";
 
 type StudioOrder = {
@@ -18,7 +20,29 @@ type StudioOrder = {
   ship_line1: string | null; ship_line2: string | null;
   ship_city: string | null; ship_state: string | null;
   ship_zip: string | null; shipping_label: string | null; user_id: string;
+  map_frame: { bbox: [number, number, number, number];
+               title?: string } | null;
 };
+
+function FrameMini({ frame }:
+  { frame: NonNullable<StudioOrder["map_frame"]> }) {
+  return (
+    <div ref={el => {
+           if (!el || (el as HTMLDivElement & { _m?: boolean })._m) return;
+           (el as HTMLDivElement & { _m?: boolean })._m = true;
+           const m = L.map(el, { zoomControl: false, dragging: false,
+             scrollWheelZoom: false, doubleClickZoom: false,
+             boxZoom: false, keyboard: false, touchZoom: false });
+           L.tileLayer(
+             "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+             { subdomains: "abcd", maxZoom: 19,
+               attribution: "&copy; OSM &copy; CARTO" }).addTo(m);
+           const [w, s2, e, n] = frame.bbox;
+           m.fitBounds([[s2, w], [n, e]], { animate: false });
+         }}
+         className="h-40 w-32 rounded border border-ink/15 overflow-hidden" />
+  );
+}
 type Img = { id: string; order_id: string; storage_path: string; kind: string };
 
 const STATUSES = ["pending_payment", "paid", "in_production",
@@ -256,6 +280,14 @@ export default function Studio() {
 
                 <div>
                   <div className="caption">Files</div>
+                  {o.product_key === "city" && o.map_frame && (
+                    <div className="mb-3">
+                      <FrameMini frame={o.map_frame} />
+                      <span className="caption block mt-1">
+                        their framed map
+                      </span>
+                    </div>
+                  )}
                   <div className="mt-2 flex flex-wrap gap-3">
                     {mine.map(g => (
                       <a key={g.id} href={urls[g.id]} target="_blank"

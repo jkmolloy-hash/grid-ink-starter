@@ -9,13 +9,14 @@ export type ShippingOption = {
 };
 
 export const PRODUCTS: Record<ProductKey, {
-  name: string; size: string; priceCents: number;
+  name: string; size: string; priceCents: number; inkLabel: string;
   shippingCents: number; shipMethod: string;
   shippingOptions: ShippingOption[];
   blurb: string; framed: boolean;
 }> = {
   sports: {
     name: "Sports Line Art Portrait",
+    inkLabel: "your choice of inks",
     size: '12" x 18"',
     priceCents: 9800,                    // $98 — shipping included
     shippingCents: 0,                    // included (US)
@@ -30,6 +31,7 @@ export const PRODUCTS: Record<ProductKey, {
   },
   city: {
     name: "City Map Art",
+    inkLabel: "white ink on navy stock",
     size: '16" x 20"',
     priceCents: 9800,                    // $98 — shipping included
     shippingCents: 0,                    // included (US)
