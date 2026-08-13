@@ -15,7 +15,7 @@ export default function Nav() {
         <span className="opacity-40">&middot;</span>
         <span>Archival paper &amp; inks</span>
         <span className="opacity-40 hidden sm:inline">&middot;</span>
-        <span className="hidden sm:inline">Every piece one of one &middot; signed</span>
+        <span className="hidden sm:inline">Every piece one of one</span>
       </div>
     </div>
     <header className="bg-paper border-b border-ink/10">
