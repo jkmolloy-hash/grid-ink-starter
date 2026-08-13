@@ -196,7 +196,7 @@ export default function Create() {
           </div>
           <div className="flex justify-between text-sm text-ink/70">
             <span>Shipping &mdash; {product.framed ? "framed flat pack" : "secure tube"}</span>
-            <span>{money(product.shippingCents)}</span>
+            <span>{product.shippingCents === 0 ? "Included" : money(product.shippingCents)}</span>
           </div>
           <div className="flex justify-between font-extrabold text-lg pt-2">
             <span>Total</span>
