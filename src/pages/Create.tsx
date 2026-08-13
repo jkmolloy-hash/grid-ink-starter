@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
 import Mockup, { DEFAULT_LAYOUT, type Layout } from "@/components/Mockup";
-import { PRODUCTS, TURNAROUND, type ProductKey } from "@/config";
+import { PRODUCTS, TURNAROUND, type ProductKey, BRAND } from "@/config";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
@@ -335,7 +335,8 @@ export default function Create() {
           </div>
           <div className="caption">
             US shipping only &middot; international assessed per order
-            &mdash; email us first
+            &mdash; <a className="underline"
+                       href={"mailto:" + BRAND.email}>email us first</a>
           </div>
           <div className="flex justify-between font-extrabold text-lg pt-2">
             <span>Total</span>

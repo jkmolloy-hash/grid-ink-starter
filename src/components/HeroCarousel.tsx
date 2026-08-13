@@ -120,6 +120,11 @@ export default function HeroCarousel() {
               )}
             </div>
           )}
+          {/* readability scrim so the caption never fights the art */}
+          <div className={"absolute inset-x-0 bottom-0 h-[46%] pointer-events-none "
+                          + (s.tone === "light"
+                             ? "bg-gradient-to-t from-paper via-paper/70 to-transparent"
+                             : "bg-gradient-to-t from-ink via-ink/70 to-transparent")} />
           {/* copy */}
           <div className={"absolute left-0 right-0 bottom-0 px-6 sm:px-10 pb-12 " +
                           (s.tone === "light" ? "text-ink" : "text-paper")}>

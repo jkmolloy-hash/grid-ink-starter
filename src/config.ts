@@ -49,6 +49,7 @@ export const PRODUCT = PRODUCTS.sports;  // legacy alias
 export const BRAND = {
   name: "GRID & INK CO.",
   tagline: "One pen. One line at a time. No two alike.",
+  email: "gridpenco@gmail.com",
   ink: "#082b4a",
 };
 
