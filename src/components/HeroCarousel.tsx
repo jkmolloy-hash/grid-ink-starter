@@ -5,7 +5,8 @@ import PlottedLogo from "@/components/PlottedLogo";
 
 /* Full-bleed slides in the gallery-wall treatment: a framed piece on a
    lit wall, drifting slowly (Ken Burns), crossfading every 7 seconds.
-   Slide 3 is the brand moment — the logo drawing itself. */
+   Slide 5 is the brand moment — the logo drawing itself.
+   Copy sits in its own band below the art so it never overlaps the frame. */
 
 const money = (c: number) =>
   (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD",
@@ -81,48 +82,64 @@ export default function HeroCarousel() {
              aria-roledescription="carousel">
       {SLIDES.map((s, i) => (
         <div key={i}
-             className={"absolute inset-0 transition-opacity duration-1000 " +
+             className={"absolute inset-0 flex flex-col transition-opacity duration-1000 " +
                         (active === i ? "opacity-100" : "opacity-0 pointer-events-none")}
              aria-hidden={active !== i}>
-          {s.kind === "art" ? (
-            <div key={`${i}-${active === i}`}
-                 className={"absolute inset-0 " + (active === i ? s.zoom : "")}
-                 style={{ background: s.wall }}>
-              {/* plaster grain */}
-              <svg className="absolute inset-0 h-full w-full opacity-[0.05] mix-blend-multiply"
-                   aria-hidden="true">
-                <filter id={`grain-${i}`}>
-                  <feTurbulence type="fractalNoise" baseFrequency="0.9"
-                                numOctaves="2" />
-                </filter>
-                <rect width="100%" height="100%" filter={`url(#grain-${i})`} />
-              </svg>
-              {/* the framed piece */}
-              <div className="absolute inset-0 flex items-center justify-center pb-10">
-                <div className="relative">
-                  <div className="bg-[#17191c] p-[10px] rounded-[3px]
-                                  shadow-[0_30px_60px_-12px_rgba(8,43,74,0.45),0_18px_26px_-14px_rgba(0,0,0,0.35)]">
-                    <div className="bg-white p-[16px]">
-                      <img src={s.img} alt={s.alt}
-                           className="block max-h-[56vh] w-auto" />
+
+          {/* art / logo area */}
+          <div className="relative flex-1 min-h-0 overflow-hidden">
+            {s.kind === "art" ? (
+              <div key={`${i}-${active === i}`}
+                   className={"absolute inset-0 " + (active === i ? s.zoom : "")}
+                   style={{ background: s.wall }}>
+                {/* plaster grain */}
+                <svg className="absolute inset-0 h-full w-full opacity-[0.05] mix-blend-multiply"
+                     aria-hidden="true">
+                  <filter id={`grain-${i}`}>
+                    <feTurbulence type="fractalNoise" baseFrequency="0.9"
+                                  numOctaves="2" />
+                  </filter>
+                  <rect width="100%" height="100%" filter={`url(#grain-${i})`} />
+                </svg>
+                {/* the framed piece */}
+                <div className="absolute inset-0 flex items-center justify-center pb-10">
+                  <div className="relative">
+                    <div className="bg-[#17191c] p-[10px] rounded-[3px]
+                                    shadow-[0_30px_60px_-12px_rgba(8,43,74,0.45),0_18px_26px_-14px_rgba(0,0,0,0.35)]">
+                      <div className="bg-white p-[16px]">
+                        <img src={s.img} alt={s.alt}
+                             className="block max-h-[46vh] w-auto" />
+                      </div>
                     </div>
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
+                                    h-8 w-[85%] rounded-full bg-black/25 blur-xl"
+                         aria-hidden="true" />
                   </div>
-                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
-                                  h-8 w-[85%] rounded-full bg-black/25 blur-xl"
-                       aria-hidden="true" />
                 </div>
               </div>
+            ) : (
+              <div className="absolute inset-0 bg-ink flex items-center justify-center pb-10">
+                {active === i && (
+                  <PlottedLogo key="draw" className="h-[46vh] w-auto" />
+                )}
+              </div>
+            )}
+
+            {/* dots — inside the art area so they never sit on the copy band */}
+            <div className="absolute bottom-6 right-8 z-20 flex gap-2">
+              {SLIDES.map((_, d) => (
+                <button key={d} onClick={() => setActive(d)}
+                        aria-label={`Slide ${d + 1}`}
+                        className={"h-2.5 w-2.5 rounded-full border border-paper/70 transition " +
+                                   (active === d ? "bg-paper" : "bg-transparent")} />
+              ))}
             </div>
-          ) : (
-            <div className="absolute inset-0 bg-ink flex items-center justify-center pb-10">
-              {active === i && (
-                <PlottedLogo key="draw" className="h-[62vh] w-auto" />
-              )}
-            </div>
-          )}
-          {/* copy */}
-          <div className={"absolute left-0 right-0 bottom-0 px-6 sm:px-10 pb-12 " +
-                          (s.tone === "light" ? "text-ink" : "text-paper")}>
+          </div>
+
+          {/* copy band */}
+          <div className={"relative shrink-0 px-6 sm:px-10 py-10 " +
+                          (s.tone === "light" ? "text-ink" : "text-paper bg-ink")}
+               style={s.tone === "light" && s.wall ? { background: s.wall } : undefined}>
             <div className="max-w-6xl mx-auto">
               <div className={"caption " +
                               (s.tone === "dark" ? "!text-paper/60" : "")}>
@@ -158,15 +175,6 @@ export default function HeroCarousel() {
           </div>
         </div>
       ))}
-      {/* dots */}
-      <div className="absolute bottom-6 right-8 z-20 flex gap-2">
-        {SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setActive(i)}
-                  aria-label={`Slide ${i + 1}`}
-                  className={"h-2.5 w-2.5 rounded-full border border-paper/70 transition " +
-                             (active === i ? "bg-paper" : "bg-transparent")} />
-        ))}
-      </div>
     </section>
   );
 }
