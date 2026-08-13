@@ -2,13 +2,39 @@ import { useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
-import { drawLinePreview } from "@/lib/preview";
+import Mockup, { DEFAULT_LAYOUT, type Layout } from "@/components/Mockup";
 import { PRODUCTS, TURNAROUND, type ProductKey } from "@/config";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
    city   — name the place; we plot from real street data and email a
             proof before pen touches paper. */
+const INKS: [string, string][] = [
+  ["Blue", "#082b4a"], ["Black", "#111111"], ["Green", "#0e7a5f"],
+  ["Gold", "#c9a227"], ["Red", "#c1121f"],
+];
+
+function InkRow({ label, value, onPick }:
+  { label: string; value: string; onPick: (c: string) => void }) {
+  return (
+    <div className="mt-3 flex items-center gap-3">
+      <span className="caption w-24">{label}</span>
+      <div className="flex gap-2">
+        {INKS.map(([name, hex]) => (
+          <button key={hex} type="button" title={name}
+                  aria-label={name + " ink"}
+                  onClick={() => onPick(hex)}
+                  className={"h-7 w-7 rounded border-2 transition "
+                    + (value === hex
+                       ? "border-ink ring-2 ring-ink/30 scale-110"
+                       : "border-ink/20 hover:border-ink/60")}
+                  style={{ background: hex }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Create() {
   const session = useSession();
   const nav = useNavigate();
@@ -16,8 +42,6 @@ export default function Create() {
   const key: ProductKey = params.get("product") === "city" ? "city" : "sports";
   const product = PRODUCTS[key];
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imgRef = useRef<HTMLImageElement | null>(null);
   const fileRef = useRef<File | null>(null);
   const [hasPhoto, setHasPhoto] = useState(false);
   const [athlete, setAthlete] = useState("");
@@ -29,25 +53,26 @@ export default function Create() {
   const logoRef = useRef<File | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [logoName, setLogoName] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [colorMode, setColorMode] = useState<"single" | "two">("single");
+  const [inkArt, setInkArt] = useState("#082b4a");
+  const [inkText, setInkText] = useState("#082b4a");
+  const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
   const [err, setErr] = useState("");
 
   const money = (c: number) =>
     (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
 
-  function render() {
-    if (imgRef.current && canvasRef.current)
-      drawLinePreview(canvasRef.current, imgRef.current, athlete);
-  }
   function onFile(f: File | undefined | null) {
     if (!f) return;
     if (!f.type.startsWith("image/")) { setErr("Please choose an image file."); return; }
     setErr(""); fileRef.current = f;
     const img = new Image();
     img.onload = () => {
-      imgRef.current = img;
       setLowRes(Math.min(img.naturalWidth, img.naturalHeight) < 1200
         ? { w: img.naturalWidth, h: img.naturalHeight } : null);
-      setHasPhoto(true); render();
+      setPhotoUrl(img.src);
+      setHasPhoto(true);
     };
     img.src = URL.createObjectURL(f);
   }
@@ -79,6 +104,10 @@ export default function Create() {
         shipping_options: product.shippingOptions,
         athlete_name: key === "sports" ? (athlete || null) : null,
         line2: key === "sports" ? (line2.trim() || null) : null,
+        color_mode: key === "sports" ? colorMode : null,
+        ink_art: key === "sports" ? (colorMode === "two" ? inkArt : inkText) : null,
+        ink_text: key === "sports" ? inkText : null,
+        layout: key === "sports" ? layout : null,
         city_name: key === "city" ? cityName : null,
         notes: notes || null,
         status: "pending_payment",
@@ -149,8 +178,16 @@ export default function Create() {
             </label>
           ) : (
             <>
-              <canvas ref={canvasRef}
-                      className="w-full max-w-md rounded-md shadow-sheet border border-ink/10" />
+              <Mockup photoUrl={photoUrl} name={athlete} line2={line2}
+                      logoUrl={logoUrl}
+                      inkArt={colorMode === "two" ? inkArt : inkText}
+                      inkText={inkText}
+                      layout={layout} onLayout={setLayout} />
+              <p className="caption mt-3 text-center max-w-md">
+                Layout preview &mdash; drag the name, line and logo where you
+                want them. The finished piece is hand-plotted line art, drawn
+                from this photo.
+              </p>
               {lowRes && (
                 <p className="caption mt-3 text-center max-w-md"
                    style={{ color: "#b45309" }}>
@@ -200,8 +237,7 @@ export default function Create() {
             <input className="field mt-1" placeholder="e.g. TOM KID"
                    maxLength={24}
                    value={athlete}
-                   onChange={e => setAthlete(e.target.value)}
-                   onBlur={render} />
+                   onChange={e => setAthlete(e.target.value)} />
             <span className="caption block text-right mt-1">
               {athlete.length}/24
             </span>
@@ -248,6 +284,30 @@ export default function Create() {
               </div>
             )}
           </div>
+          <div className="mt-5">
+            <div className="font-semibold text-sm">Ink colors</div>
+            <div className="mt-2 flex gap-2">
+              {(["single", "two"] as const).map(m => (
+                <button key={m} type="button"
+                        onClick={() => { setColorMode(m);
+                          if (m === "single") setInkArt(inkText); }}
+                        className={"px-3 py-1.5 rounded-md border text-sm font-semibold transition "
+                          + (colorMode === m
+                             ? "border-ink bg-ink text-paper"
+                             : "border-ink/25 hover:border-ink")}>
+                  {m === "single" ? "One color" : "Two colors"}
+                </button>
+              ))}
+            </div>
+            <InkRow label={colorMode === "two"
+                            ? "Text & logo" : "Everything"}
+                    value={inkText}
+                    onPick={c => { setInkText(c);
+                      if (colorMode === "single") setInkArt(c); }} />
+            {colorMode === "two" && (
+              <InkRow label="Artwork" value={inkArt} onPick={setInkArt} />
+            )}
+          </div>
           </>
         ) : (
           <>
@@ -271,7 +331,11 @@ export default function Create() {
           </div>
           <div className="flex justify-between text-sm text-ink/70">
             <span>Shipping &mdash; {product.framed ? "framed flat pack" : "secure tube"}</span>
-            <span>{money(product.shippingCents)}</span>
+            <span>Included</span>
+          </div>
+          <div className="caption">
+            US shipping only &middot; international assessed per order
+            &mdash; email us first
           </div>
           <div className="flex justify-between font-extrabold text-lg pt-2">
             <span>Total</span>
