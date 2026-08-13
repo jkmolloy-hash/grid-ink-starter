@@ -35,3 +35,24 @@ body { @apply bg-bench text-ink font-sans antialiased; }
 @media (prefers-reduced-motion: reduce) {
   .kb-in, .kb-out { animation: none; transform: none; }
 }
+
+/* Blueprint map: light tiles inverted toward brand navy — white streets */
+.blueprint-map .leaflet-tile {
+  filter: invert(1) sepia(1) hue-rotate(185deg) saturate(4.2)
+          brightness(0.72) contrast(1.05);
+}
+.blueprint-map .leaflet-container { background: #082b4a; }
+.blueprint-map .leaflet-control-attribution {
+  background: rgba(8, 43, 74, 0.55);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 9px;
+  padding: 1px 5px;
+}
+.blueprint-map .leaflet-control-attribution a {
+  color: rgba(255, 255, 255, 0.85);
+}
+.blueprint-map .leaflet-control-zoom a {
+  background: #0b3155;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}

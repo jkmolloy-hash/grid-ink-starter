@@ -44,6 +44,8 @@ function FrameMini({ frame }:
   );
 }
 type Img = { id: string; order_id: string; storage_path: string; kind: string };
+type Msg = { id: string; created_at: string; name: string; email: string;
+             message: string };
 
 const STATUSES = ["pending_payment", "paid", "in_production",
   "changes_requested", "proof_ready", "approved", "shipped",
@@ -103,6 +105,7 @@ export default function Studio() {
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
+  const [inbox, setInbox] = useState<Msg[]>([]);
 
   async function refresh() {
     const q = await supabase.rpc("studio_orders");
@@ -122,6 +125,9 @@ export default function Studio() {
       }
       setUrls(next);
     } else { setImages([]); setUrls({}); }
+    const mb = await supabase.from("contact_messages").select("*")
+      .order("created_at", { ascending: false }).limit(50);
+    setInbox((mb.data ?? []) as Msg[]);
   }
 
   useEffect(() => {
@@ -332,6 +338,36 @@ export default function Studio() {
             </div>
           );
         })}
+      </div>
+
+      <div className="mt-14">
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-xl font-bold">Inbox</h2>
+          <span className="caption">from the contact form</span>
+        </div>
+        {inbox.length === 0 && (
+          <p className="caption mt-3">No messages.</p>
+        )}
+        <div className="mt-4 space-y-4">
+          {inbox.map(m => (
+            <div key={m.id}
+                 className="bg-paper rounded-lg border border-ink/10
+                            shadow-sheet p-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="font-semibold">{m.name}</span>
+                <span className="caption">{m.email}</span>
+                <span className="caption">{m.created_at.slice(0, 10)}</span>
+                <a className="caption underline ml-auto"
+                   href={"mailto:" + m.email
+                     + "?subject=" + encodeURIComponent(
+                         "Re: your note to Grid & Ink")}>
+                  Reply
+                </a>
+              </div>
+              <p className="mt-2 text-sm whitespace-pre-wrap">{m.message}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

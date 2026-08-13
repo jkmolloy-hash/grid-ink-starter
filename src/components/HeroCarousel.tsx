@@ -70,7 +70,7 @@ export default function HeroCarousel() {
   const [paused, setPaused] = useState(false);
   useEffect(() => {
     if (paused) return;
-    const t = setInterval(() => setActive(a => (a + 1) % SLIDES.length), 7000);
+    const t = setInterval(() => setActive(a => (a + 1) % SLIDES.length), 4000);
     return () => clearInterval(t);
   }, [paused]);
 

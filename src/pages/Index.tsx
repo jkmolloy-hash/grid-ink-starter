@@ -23,9 +23,9 @@ export default function Index() {
           </div>
           <div className="grid sm:grid-cols-3 gap-10">
             {[
-              ["01", "Upload a photo", "A clear action shot or portrait. You'll see the plotted design instantly."],
-              ["02", "Approve the preview", "Add the athlete's name. What you see is the piece we draw."],
-              ["03", "We plot & ship", "A pen physically draws every line. Framed, packed, shipped."],
+              ["01", "Upload & compose", "A clear action shot or portrait. Add the name, school line, inks and layout \u2014 your piece, your way."],
+              ["02", "Approve the proof", "Before the pen ever touches paper, your finished proof appears in your account for approval \u2014 one round of changes included."],
+              ["03", "We plot & ship", "A pen physically draws every line. Signed, framed, packed, shipped."],
             ].map(([n, t, d]) => (
               <div key={n}>
                 <div className="caption">{n}</div>

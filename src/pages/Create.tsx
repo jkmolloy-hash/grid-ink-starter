@@ -192,12 +192,12 @@ export default function Create() {
                    onDragOver={e => e.preventDefault()}
                    onDrop={e => { e.preventDefault(); onFile(e.dataTransfer.files?.[0]); }}>
               <span className="text-4xl">&#8679;</span>
-              <span className="font-semibold">Drop a photo here, or click to choose</span>
+              <span className="font-semibold text-center px-4">Drop a photo here, or click to choose</span>
               <span className="caption text-center px-6">
                 Fill the frame with the athlete &mdash; action or posed both
                 work. Skip distant, full-field shots.
               </span>
-              <span className="caption opacity-80">
+              <span className="caption opacity-80 text-center px-6">
                 Best at 1500&nbsp;px or larger on the short side
                 (any recent phone photo)
               </span>
@@ -233,7 +233,7 @@ export default function Create() {
           )
         ) : (
           <div className="flex flex-col items-center">
-            <MapPicker frameRef={frameRef} fly={fly} />
+            <MapPicker frameRef={frameRef} fly={fly} title={cityName} />
             <p className="caption mt-3 text-center max-w-md">
               Search your place, then drag and zoom until the frame holds
               exactly the streets you want &mdash; the finished piece is

@@ -35,6 +35,9 @@ export default function Nav() {
           <Link to="/create" className="font-semibold hover:underline underline-offset-4">
             Create yours
           </Link>
+          <Link to="/contact" className="font-semibold hover:underline underline-offset-4">
+            Contact
+          </Link>
           {studio && (
             <Link to="/studio"
                   className="font-semibold hover:underline underline-offset-4">
