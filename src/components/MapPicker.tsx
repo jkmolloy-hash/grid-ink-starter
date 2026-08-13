@@ -45,7 +45,7 @@ export default function MapPicker({ frameRef, fly, title }: Props) {
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>')
       .addTo(map);
     L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
       { subdomains: "abcd", maxZoom: 19 },
     ).addTo(map);
     const update = () => {
@@ -94,12 +94,12 @@ export default function MapPicker({ frameRef, fly, title }: Props) {
           <svg viewBox="0 0 24 46" aria-hidden="true" fill="none"
                className="pointer-events-none absolute top-6 right-6 w-5
                           text-paper/90 z-[500]">
-            <path d="M8 14 L8 3 L16 14 L16 3" stroke="currentColor"
-                  strokeWidth="1.6" strokeLinecap="round"
-                  strokeLinejoin="round" />
-            <line x1="12" y1="20" x2="12" y2="42" stroke="currentColor"
+            <text x="12" y="11" textAnchor="middle" fontSize="11"
+                  fontFamily="IBM Plex Mono, monospace" fontWeight="600"
+                  fill="currentColor">N</text>
+            <line x1="12" y1="17" x2="12" y2="40" stroke="currentColor"
                   strokeWidth="1.6" strokeLinecap="round" />
-            <path d="M7 27 L12 20 L17 27" stroke="currentColor"
+            <path d="M7 24 L12 17 L17 24" stroke="currentColor"
                   strokeWidth="1.6" strokeLinecap="round"
                   strokeLinejoin="round" />
           </svg>

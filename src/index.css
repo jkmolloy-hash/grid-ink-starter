@@ -38,7 +38,7 @@ body { @apply bg-bench text-ink font-sans antialiased; }
 
 /* Blueprint map: light tiles inverted toward brand navy — white streets */
 .blueprint-map .leaflet-tile {
-  filter: invert(1) grayscale(1) brightness(1.08) contrast(1.12);
+  filter: grayscale(1) brightness(2.3) contrast(1.55);
 }
 .blueprint-map .leaflet-container { background: #000; }
 .blueprint-map .leaflet-control-attribution {

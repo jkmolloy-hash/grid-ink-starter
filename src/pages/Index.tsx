@@ -40,8 +40,8 @@ export default function Index() {
       {/* THE WORK — a real piece, on the bench */}
       <section className="bg-ink text-paper">
         <div className="max-w-6xl mx-auto px-5 py-16 grid lg:grid-cols-2 gap-12 items-center">
-          <img src="/gallery/sports-example.jpg"
-               alt="Hand-plotted sports portrait in the single-line style"
+          <img src="/gallery/hero-basketball.jpg"
+               alt="Hand-plotted basketball portrait, Eagles 14"
                className="rounded-md w-full max-w-md mx-auto ring-1 ring-paper/20" />
           <div>
             <div className="caption !text-paper/60 mb-3">A finished piece</div>
