@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------
    The catalog. Prices are James's real numbers (Aug 2026).
-   TODO(James): confirm the two SHIPPING amounts — placeholders below.
+   Shipping is now included in the price for both products.
 ------------------------------------------------------------------- */
 export type ProductKey = "sports" | "city";
 
@@ -17,14 +17,11 @@ export const PRODUCTS: Record<ProductKey, {
   sports: {
     name: "Sports Line Art Portrait",
     size: '12" x 18"',
-    priceCents: 9000,                    // $90
-    shippingCents: 1800,                 // = Standard below (card display)
+    priceCents: 9800,                    // $98, shipping included
+    shippingCents: 0,
     shipMethod: "Framed, protected flat pack",
-    // TODO(James): replace with real Pirate Ship quotes (packed weights)
     shippingOptions: [
-      { label: "Standard (USPS Ground)", amountCents: 1800, estDays: [5, 8] },
-      { label: "Priority (USPS Priority Mail)", amountCents: 3200,
-        estDays: [2, 3] },
+      { label: "Shipping included (USPS Ground)", amountCents: 0, estDays: [5, 8] },
     ],
     blurb: "Your athlete drawn as one continuous pen line. Arrives framed.",
     framed: true,
@@ -32,14 +29,11 @@ export const PRODUCTS: Record<ProductKey, {
   city: {
     name: "City Map Art",
     size: '16" x 20"',
-    priceCents: 9000,                    // $90
-    shippingCents: 1200,                 // = Standard below (card display)
+    priceCents: 9800,                    // $98, shipping included
+    shippingCents: 0,
     shipMethod: "Rolled in a secure shipping tube",
-    // TODO(James): replace with real Pirate Ship quotes (packed weights)
     shippingOptions: [
-      { label: "Standard (USPS Ground)", amountCents: 1200, estDays: [5, 8] },
-      { label: "Priority (USPS Priority Mail)", amountCents: 2400,
-        estDays: [2, 3] },
+      { label: "Shipping included (USPS Ground)", amountCents: 0, estDays: [5, 8] },
     ],
     blurb: "A minimalist plotted street map of a place that matters.",
     framed: false,
