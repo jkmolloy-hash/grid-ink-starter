@@ -108,12 +108,8 @@ export default function Create() {
                    onDragOver={e => e.preventDefault()}
                    onDrop={e => { e.preventDefault(); onFile(e.dataTransfer.files?.[0]); }}>
               <span className="text-4xl">&#8679;</span>
-              <span className="font-semibold">Drop a photo here, or click to choose</span>
-              <span className="caption text-center px-6">
-                Fill the frame with the athlete &mdash; action or posed both
-                work. Skip distant, full-field shots.
-              </span>
-              <span className="caption opacity-80">
+              <span className="font-semibold text-center">Drop a photo here, or click to choose</span>
+              <span className="caption text-center opacity-80">
                 Best at 1500&nbsp;px or larger on the short side
                 (any recent phone photo)
               </span>
@@ -217,7 +213,7 @@ export default function Create() {
           </Link>
         )}
         <p className="caption mt-3">
-          Secure payment by Stripe. {TURNAROUND}.
+          Secure payment by Stripe. Ships in 2 days.
         </p>
         <button className="caption mt-4 underline underline-offset-4"
                 onClick={() => nav("/")}>Back to home</button>
