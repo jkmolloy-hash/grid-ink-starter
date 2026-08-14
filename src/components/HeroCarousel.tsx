@@ -80,9 +80,12 @@ export default function HeroCarousel() {
   const [paused, setPaused] = useState(false);
   useEffect(() => {
     if (paused) return;
-    const t = setInterval(() => setActive(a => (a + 1) % SLIDES.length), 4000);
-    return () => clearInterval(t);
-  }, [paused]);
+    // Art slides move at a brisk 4s; the logo slide gets 8s — its
+    // self-drawing animation takes 6.5s and deserves to finish.
+    const dwell = SLIDES[active].kind === "logo" ? 8000 : 4000;
+    const t = setTimeout(() => setActive(a => (a + 1) % SLIDES.length), dwell);
+    return () => clearTimeout(t);
+  }, [paused, active]);
 
   return (
     <section className="relative h-[82vh] min-h-[540px] overflow-hidden bg-ink"
