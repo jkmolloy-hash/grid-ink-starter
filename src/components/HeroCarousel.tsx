@@ -19,6 +19,7 @@ type Slide = {
   cta?: { to: string; label: string };
   ghost?: { href: string; label: string };
   sub?: string;
+  landscape?: boolean;
 };
 
 const SLIDES: Slide[] = [
@@ -45,7 +46,7 @@ const SLIDES: Slide[] = [
     cta: { to: "/create?product=sports",
            label: `Start a portrait — ${money(PRODUCTS.sports.priceCents)}` },
     ghost: { href: "#how", label: "How it works" } },
-  { kind: "art", img: "/gallery/hero-defender.jpg",
+  { kind: "art", img: "/gallery/hero-defender.jpg", landscape: true,
     alt: "Hand-plotted 2000 Land Rover Defender 110 TD5, red ink with gold title, framed",
     wall: "radial-gradient(120% 90% at 35% 18%, #f1eee8 0%, #e4dfd4 55%, #d4cec1 100%)",
     zoom: "kb-in", tone: "light",
@@ -129,7 +130,10 @@ export default function HeroCarousel() {
                                   shadow-[0_30px_60px_-12px_rgba(8,43,74,0.45),0_18px_26px_-14px_rgba(0,0,0,0.35)]">
                     <div className="bg-white p-[16px]">
                       <img src={s.img} alt={s.alt} draggable={false}
-                           className="block max-h-[56vh] max-w-[86vw] w-auto object-contain" />
+                           className={"block w-auto object-contain "
+                             + (s.landscape
+                                ? "max-h-[42vh] max-w-[min(56vh,86vw)]"
+                                : "max-h-[56vh] max-w-[86vw]")} />
                     </div>
                   </div>
                   <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
