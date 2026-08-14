@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { BRAND } from "@/config";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useSession } from "@/App";
@@ -358,10 +359,15 @@ export default function Studio() {
                 <span className="caption">{m.email}</span>
                 <span className="caption">{m.created_at.slice(0, 10)}</span>
                 <a className="caption underline ml-auto"
-                   href={"mailto:" + m.email
-                     + "?subject=" + encodeURIComponent(
-                         "Re: your note to Grid & Ink")}>
-                  Reply
+                   target="_blank" rel="noreferrer"
+                   href={"https://mail.google.com/mail/u/" + BRAND.email
+                     + "/?view=cm&fs=1&to=" + encodeURIComponent(m.email)
+                     + "&su=" + encodeURIComponent(
+                         "Re: your note to Grid & Ink")
+                     + "&body=" + encodeURIComponent(
+                         "\n\n\u2014 your note:\n> "
+                         + m.message.slice(0, 500))}>
+                  Reply from the studio
                 </a>
               </div>
               <p className="mt-2 text-sm whitespace-pre-wrap">{m.message}</p>

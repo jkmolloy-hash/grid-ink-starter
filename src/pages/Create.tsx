@@ -71,8 +71,19 @@ export default function Create() {
   function onFile(f: File | undefined | null) {
     if (!f) return;
     if (!f.type.startsWith("image/")) { setErr("Please choose an image file."); return; }
+    if (/hei[cf]/i.test(f.type) || /\.hei[cf]$/i.test(f.name)) {
+      setErr("iPhone photos in HEIC format can't be read by most browsers. "
+        + "On the iPhone, Share the photo and choose JPEG \u2014 or set "
+        + "Settings \u2192 Camera \u2192 Formats \u2192 Most Compatible \u2014 "
+        + "then upload that copy.");
+      return;
+    }
     setErr(""); fileRef.current = f;
     const img = new Image();
+    img.onerror = () => {
+      setErr("That photo couldn't be read by the browser. "
+        + "A JPG or PNG version will work.");
+    };
     img.onload = () => {
       setLowRes(Math.min(img.naturalWidth, img.naturalHeight) < 1200
         ? { w: img.naturalWidth, h: img.naturalHeight } : null);
@@ -170,6 +181,15 @@ export default function Create() {
         body: { orderId: ins.data.id },
       });
       if (fn.error) throw fn.error;
+      if (fn.error) {
+        let msg = "Checkout couldn't start.";
+        try {
+          const body = await (fn.error as { context: Response })
+            .context.json();
+          if (body?.error) msg = String(body.error);
+        } catch { /* keep the generic message */ }
+        throw new Error(msg);
+      }
       const url = (fn.data as { url?: string })?.url;
       if (!url) throw new Error("No checkout link returned.");
       window.location.href = url;
@@ -387,6 +407,13 @@ export default function Create() {
           <Link to={`/auth?next=/create?product=${key}`} className="btn-ink w-full mt-5">
             Sign in to order
           </Link>
+        )}
+        {session && !ready && (
+          <p className="caption mt-2 text-center">
+            {key === "sports"
+              ? "Add a photo above to unlock checkout."
+              : "Enter your city above to unlock checkout."}
+          </p>
         )}
         <p className="caption mt-3">
           Secure payment by Stripe. {TURNAROUND}.
