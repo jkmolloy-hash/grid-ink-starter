@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { PRODUCTS } from "@/config";
 import PlottedLogo from "@/components/PlottedLogo";
@@ -22,6 +22,10 @@ type Slide = {
 };
 
 const SLIDES: Slide[] = [
+  { kind: "logo", tone: "dark",
+    kicker: "Plotted, not printed",
+    head: ["Drawn the way we", "draw everything."],
+    ghost: { href: "#how", label: "See the process" } },
   { kind: "art", img: "/gallery/hero-basketball.jpg",
     alt: "Hand-plotted basketball portrait, Eagles 14, framed",
     wall: "radial-gradient(120% 90% at 30% 20%, #f3f0ea 0%, #e7e3da 55%, #d8d3c8 100%)",
@@ -69,15 +73,12 @@ const SLIDES: Slide[] = [
     cta: { to: "/create?product=city",
            label: `Map your place — ${money(PRODUCTS.city.priceCents)}` },
     ghost: { href: "#newsletter", label: "Join the town vote" } },
-  { kind: "logo", tone: "dark",
-    kicker: "Plotted, not printed",
-    head: ["Drawn the way we", "draw everything."],
-    ghost: { href: "#how", label: "See the process" } },
 ];
 
 export default function HeroCarousel() {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const swipeRef = useRef<{ x: number; y: number } | null>(null);
   useEffect(() => {
     if (paused) return;
     // Art slides move at a brisk 4s; the logo slide gets 8s — its
@@ -88,9 +89,20 @@ export default function HeroCarousel() {
   }, [paused, active]);
 
   return (
-    <section className="relative h-[82vh] min-h-[540px] overflow-hidden bg-ink"
+    <section className="relative h-[82vh] min-h-[540px] overflow-hidden bg-ink
+                        [touch-action:pan-y]"
              onMouseEnter={() => setPaused(true)}
              onMouseLeave={() => setPaused(false)}
+             onPointerDown={e =>
+               { swipeRef.current = { x: e.clientX, y: e.clientY }; }}
+             onPointerUp={e => {
+               const st = swipeRef.current; swipeRef.current = null;
+               if (!st) return;
+               const dx = e.clientX - st.x, dy = e.clientY - st.y;
+               if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5)
+                 setActive(a => (a + (dx < 0 ? 1 : -1) + SLIDES.length)
+                                % SLIDES.length);
+             }}
              aria-roledescription="carousel">
       {SLIDES.map((s, i) => (
         <div key={i}
@@ -116,8 +128,8 @@ export default function HeroCarousel() {
                   <div className="bg-[#17191c] p-[10px] rounded-[3px]
                                   shadow-[0_30px_60px_-12px_rgba(8,43,74,0.45),0_18px_26px_-14px_rgba(0,0,0,0.35)]">
                     <div className="bg-white p-[16px]">
-                      <img src={s.img} alt={s.alt}
-                           className="block max-h-[56vh] w-auto" />
+                      <img src={s.img} alt={s.alt} draggable={false}
+                           className="block max-h-[56vh] max-w-[86vw] w-auto object-contain" />
                     </div>
                   </div>
                   <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
