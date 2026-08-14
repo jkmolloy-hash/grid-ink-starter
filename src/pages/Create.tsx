@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
@@ -44,6 +44,9 @@ export default function Create() {
   const key: ProductKey =
     q === "city" ? "city" : q === "custom" ? "custom" : "sports";
   const isPhoto = key !== "city";
+  const [orient, setOrient] =
+    useState<"portrait" | "landscape">(PRODUCTS[key].defaultOrientation);
+  useEffect(() => { setOrient(PRODUCTS[key].defaultOrientation); }, [key]);
   const product = PRODUCTS[key];
 
   const fileRef = useRef<File | null>(null);
@@ -133,7 +136,7 @@ export default function Create() {
         user_id: session.user.id,
         product_key: key,
         product_name: product.name,
-        size_label: product.size,
+        size_label: product.sizes[orient],
         price_cents: product.priceCents,
         shipping_cents: product.shippingCents,
         ship_method: product.shipMethod,
@@ -147,7 +150,7 @@ export default function Create() {
         map_frame: key === "city" && frameRef.current
           ? { v: 2, ...(() => { const f = frameRef.current!();
               return { bbox: f.bbox, center: f.center, zoom: f.zoom }; })(),
-              orientation: "portrait", title: cityName.trim(),
+              orientation: orient, title: cityName.trim(),
               variant: "white-on-navy" }
           : null,
         city_name: key === "city" ? cityName : null,
@@ -229,7 +232,7 @@ export default function Create() {
             </label>
           ) : (
             <>
-              <Mockup sheet={key === "custom" ? "landscape" : "portrait"}
+              <Mockup sheet={orient}
                       photoUrl={photoUrl} name={athlete} line2={line2}
                       logoUrl={logoUrl}
                       inkArt={colorMode === "two" ? inkArt : inkText}
@@ -257,7 +260,8 @@ export default function Create() {
           )
         ) : (
           <div className="flex flex-col items-center">
-            <MapPicker frameRef={frameRef} fly={fly} title={cityName} />
+            <MapPicker frameRef={frameRef} fly={fly} title={cityName}
+                       orientation={orient} />
             <p className="caption mt-3 text-center max-w-md">
               Search your place, then drag and zoom until the frame holds
               exactly the streets you want &mdash; the finished piece is
@@ -273,7 +277,24 @@ export default function Create() {
         <div className="caption">Your piece</div>
         <h1 className="text-xl font-extrabold mt-1">{product.name}</h1>
         <div className="caption mt-1">
-          {product.size} &middot; {product.inkLabel} &middot; {product.framed ? "framed" : "secure tube"}
+          {product.sizes[orient]} &middot; {product.inkLabel} &middot; {product.framed ? "framed" : "secure tube"}
+        </div>
+
+        <div className="mt-5">
+          <div className="font-semibold text-sm">Orientation</div>
+          <div className="flex gap-2 mt-2">
+            {(["portrait", "landscape"] as const).map(o => (
+              <button key={o} type="button" onClick={() => setOrient(o)}
+                      className={"flex items-center gap-2 rounded border px-3 py-2 text-sm "
+                        + (orient === o
+                           ? "border-ink bg-ink text-paper"
+                           : "border-ink/25 hover:border-ink")}>
+                <span className={"inline-block border-[1.5px] border-current rounded-[2px] "
+                  + (o === "portrait" ? "w-[10px] h-[14px]" : "w-[14px] h-[10px]")} />
+                {o === "portrait" ? "Portrait" : "Landscape"}
+              </button>
+            ))}
+          </div>
         </div>
 
         {isPhoto ? (

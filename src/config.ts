@@ -10,11 +10,15 @@ export type ShippingOption = {
 
 export const PRODUCTS: Record<ProductKey, {
   name: string; size: string; priceCents: number; inkLabel: string;
+  sizes: { portrait: string; landscape: string };
+  defaultOrientation: "portrait" | "landscape";
   shippingCents: number; shipMethod: string;
   shippingOptions: ShippingOption[];
   blurb: string; framed: boolean;
 }> = {
   sports: {
+    sizes: { portrait: '12" x 18"', landscape: '18" x 12"' },
+    defaultOrientation: "portrait",
     name: "Sports Line Art Portrait",
     inkLabel: "your choice of inks",
     size: '12" x 18"',
@@ -30,6 +34,8 @@ export const PRODUCTS: Record<ProductKey, {
     framed: true,
   },
   city: {
+    sizes: { portrait: '16" x 20"', landscape: '20" x 16"' },
+    defaultOrientation: "portrait",
     name: "City Map Art",
     inkLabel: "white ink on navy stock",
     size: '16" x 20"',
@@ -45,6 +51,8 @@ export const PRODUCTS: Record<ProductKey, {
     framed: false,
   },
   custom: {
+    sizes: { portrait: '12" x 18"', landscape: '18" x 12"' },
+    defaultOrientation: "landscape",
     name: "Custom Line Art",
     inkLabel: "your choice of inks",
     size: '18" x 12"',

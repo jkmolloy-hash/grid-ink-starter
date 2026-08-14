@@ -22,7 +22,8 @@ type StudioOrder = {
   ship_city: string | null; ship_state: string | null;
   ship_zip: string | null; shipping_label: string | null; user_id: string;
   map_frame: { bbox: [number, number, number, number];
-               title?: string } | null;
+               title?: string; orientation?: string } | null;
+  size_label: string | null;
 };
 
 function FrameMini({ frame }:
@@ -41,7 +42,9 @@ function FrameMini({ frame }:
            const [w, s2, e, n] = frame.bbox;
            m.fitBounds([[s2, w], [n, e]], { animate: false });
          }}
-         className="h-40 w-32 rounded border border-ink/15 overflow-hidden" />
+         className={(frame.orientation === "landscape"
+                       ? "h-32 w-40" : "h-40 w-32")
+                    + " rounded border border-ink/15 overflow-hidden"} />
   );
 }
 type Img = { id: string; order_id: string; storage_path: string; kind: string };
@@ -248,6 +251,8 @@ export default function Studio() {
                   {o.status.replace("_", " ")}
                 </span>
                 <span className="font-semibold">{o.product_name}</span>
+                {o.size_label &&
+                  <span className="caption">{o.size_label}</span>}
                 <span className="caption">{o.created_at.slice(0, 10)}</span>
                 <span className="caption">{o.email}</span>
                 <span className="caption font-mono">#{o.id.slice(0, 8)}</span>

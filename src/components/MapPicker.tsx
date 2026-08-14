@@ -20,6 +20,7 @@ type Props = {
   frameRef: MutableRefObject<(() => MapFrame) | null>;
   fly: { lat: number; lng: number; zoom?: number } | null;
   title: string;
+  orientation?: "portrait" | "landscape";
 };
 
 function fmtCoords(lat: number, lng: number): string {
@@ -27,7 +28,8 @@ function fmtCoords(lat: number, lng: number): string {
          ` / ${Math.abs(lng).toFixed(4)}\u00b0 ${lng >= 0 ? "E" : "W"}`;
 }
 
-export default function MapPicker({ frameRef, fly, title }: Props) {
+export default function MapPicker({ frameRef, fly, title,
+                                    orientation = "portrait" }: Props) {
   const divRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const [coords, setCoords] = useState("");
@@ -68,6 +70,10 @@ export default function MapPicker({ frameRef, fly, title }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {           // container reshapes when orientation flips
+    mapRef.current?.invalidateSize();
+  }, [orientation]);
+
   useEffect(() => {
     if (fly && mapRef.current)
       mapRef.current.flyTo([fly.lat, fly.lng], fly.zoom ?? 12,
@@ -77,10 +83,13 @@ export default function MapPicker({ frameRef, fly, title }: Props) {
   const showFurniture = title.trim().length > 1;
 
   return (
-    <div className="relative w-full max-w-md blueprint-map">
+    <div className={"relative w-full blueprint-map "
+                    + (orientation === "landscape" ? "max-w-lg" : "max-w-md")}>
       <div ref={divRef}
-           className="w-full aspect-[4/5] rounded-md shadow-sheet
-                      border border-ink/10 overflow-hidden bg-[#082b4a]" />
+           className={"w-full rounded-md shadow-sheet border border-ink/10 "
+                      + "overflow-hidden bg-[#082b4a] "
+                      + (orientation === "landscape"
+                         ? "aspect-[5/4]" : "aspect-[4/5]")} />
       {/* blueprint blue: screen-blend turns black to navy, keeps white white */}
       <div className="pointer-events-none absolute inset-0 z-[400]
                       mix-blend-screen rounded-md"
