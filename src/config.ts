@@ -2,7 +2,7 @@
    The catalog. Prices are James's real numbers (Aug 2026).
    TODO(James): confirm the two SHIPPING amounts — placeholders below.
 ------------------------------------------------------------------- */
-export type ProductKey = "sports" | "city";
+export type ProductKey = "sports" | "city" | "custom";
 
 export type ShippingOption = {
   label: string; amountCents: number; estDays: [number, number];
@@ -43,6 +43,21 @@ export const PRODUCTS: Record<ProductKey, {
     ],
     blurb: "A minimalist plotted street map of a place that matters.",
     framed: false,
+  },
+  custom: {
+    name: "Custom Line Art",
+    inkLabel: "your choice of inks",
+    size: '18" x 12"',
+    priceCents: 9800,
+    shippingCents: 0,
+    shipMethod: "Framed, protected flat pack",
+    shippingOptions: [
+      { label: "US shipping \u2014 included", amountCents: 0,
+        estDays: [5, 8] },
+    ],
+    blurb: "Your car. Your boat. The stadium where it happened. "
+      + "If a photo holds it, one pen can draw it \u2014 arrives framed.",
+    framed: true,
   },
 };
 

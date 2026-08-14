@@ -88,7 +88,8 @@ export default function Index() {
                   <div className="caption">+ shipping from {money(p.shippingCents)}</div>
                 </div>
                 <Link to={`/create?product=${key}`} className="btn-ink">
-                  {key === "sports" ? "Start your portrait" : "Map your place"}
+                  {key === "sports" ? "Start your portrait"
+                    : key === "city" ? "Map your place" : "Commission yours"}
                 </Link>
               </div>
             </div>

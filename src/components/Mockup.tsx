@@ -24,11 +24,14 @@ type Props = {
   inkText: string;  // lettering + logo
   layout: Layout;
   onLayout: (l: Layout) => void;
+  sheet?: "portrait" | "landscape";
 };
 
 const W = 800, H = 1200;                    // 2:3 backing — a 12×18 sheet
 
 export default function Mockup(p: Props) {
+  const W = p.sheet === "landscape" ? 1200 : 800;
+  const H = p.sheet === "landscape" ? 800 : 1200;
   const ref = useRef<HTMLCanvasElement>(null);
   const [photo, setPhoto] = useState<HTMLImageElement | null>(null);
   const [logo, setLogo] = useState<HTMLImageElement | null>(null);

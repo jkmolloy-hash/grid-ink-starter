@@ -40,7 +40,10 @@ export default function Create() {
   const session = useSession();
   const nav = useNavigate();
   const [params] = useSearchParams();
-  const key: ProductKey = params.get("product") === "city" ? "city" : "sports";
+  const q = params.get("product");
+  const key: ProductKey =
+    q === "city" ? "city" : q === "custom" ? "custom" : "sports";
+  const isPhoto = key !== "city";
   const product = PRODUCTS[key];
 
   const fileRef = useRef<File | null>(null);
@@ -120,7 +123,7 @@ export default function Create() {
     setGeoBusy(false);
   }
 
-  const ready = key === "sports" ? hasPhoto : cityName.trim().length > 1;
+  const ready = isPhoto ? hasPhoto : cityName.trim().length > 1;
 
   async function checkout() {
     if (!session || !ready) return;
@@ -135,12 +138,12 @@ export default function Create() {
         shipping_cents: product.shippingCents,
         ship_method: product.shipMethod,
         shipping_options: product.shippingOptions,
-        athlete_name: key === "sports" ? (athlete || null) : null,
-        line2: key === "sports" ? (line2.trim() || null) : null,
-        color_mode: key === "sports" ? colorMode : null,
-        ink_art: key === "sports" ? (colorMode === "two" ? inkArt : inkText) : null,
-        ink_text: key === "sports" ? inkText : null,
-        layout: key === "sports" ? layout : null,
+        athlete_name: isPhoto ? (athlete || null) : null,
+        line2: isPhoto ? (line2.trim() || null) : null,
+        color_mode: isPhoto ? colorMode : null,
+        ink_art: isPhoto ? (colorMode === "two" ? inkArt : inkText) : null,
+        ink_text: isPhoto ? inkText : null,
+        layout: isPhoto ? layout : null,
         map_frame: key === "city" && frameRef.current
           ? { v: 2, ...(() => { const f = frameRef.current!();
               return { bbox: f.bbox, center: f.center, zoom: f.zoom }; })(),
@@ -153,7 +156,7 @@ export default function Create() {
       }).select("id").single();
       if (ins.error) throw ins.error;
 
-      if (key === "sports" && fileRef.current) {
+      if (isPhoto && fileRef.current) {
         const ext = fileRef.current.name.split(".").pop() || "jpg";
         const path = `${session.user.id}/${crypto.randomUUID()}.${ext}`;
         const up = await supabase.storage.from("customer-photos")
@@ -165,7 +168,7 @@ export default function Create() {
         if (img.error) throw img.error;
       }
 
-      if (key === "sports" && logoRef.current) {
+      if (isPhoto && logoRef.current) {
         const ext = logoRef.current.name.split(".").pop() || "png";
         const lpath = `${session.user.id}/${crypto.randomUUID()}.${ext}`;
         const lup = await supabase.storage.from("customer-photos")
@@ -203,7 +206,7 @@ export default function Create() {
     <div className="max-w-6xl mx-auto px-5 py-12 grid lg:grid-cols-[1fr_380px] gap-10">
       {/* LEFT — the sheet */}
       <div className="flex flex-col items-center">
-        {key === "sports" ? (
+        {isPhoto ? (
           !hasPhoto ? (
             <label className="w-full max-w-md aspect-[2/3] bg-paper rounded-md
                               shadow-sheet border-2 border-dashed border-ink/25
@@ -214,9 +217,9 @@ export default function Create() {
               <span className="text-4xl">&#8679;</span>
               <span className="font-semibold text-center px-4">Drop a photo here, or click to choose</span>
               <span className="caption text-center px-6">
-                Fill the frame with the athlete &mdash; action or posed both
-                work. Skip distant, full-field shots.
-              </span>
+                {key === "custom"
+                  ? "A clean side or three-quarter view works best. Get the whole subject in frame, nothing cropped."
+                  : "Fill the frame with the athlete. Action or posed both work; skip distant, full-field shots."}</span>
               <span className="caption opacity-80 text-center px-6">
                 Best at 1500&nbsp;px or larger on the short side
                 (any recent phone photo)
@@ -226,7 +229,8 @@ export default function Create() {
             </label>
           ) : (
             <>
-              <Mockup photoUrl={photoUrl} name={athlete} line2={line2}
+              <Mockup sheet={key === "custom" ? "landscape" : "portrait"}
+                      photoUrl={photoUrl} name={athlete} line2={line2}
                       logoUrl={logoUrl}
                       inkArt={colorMode === "two" ? inkArt : inkText}
                       inkText={inkText}
@@ -272,10 +276,11 @@ export default function Create() {
           {product.size} &middot; {product.inkLabel} &middot; {product.framed ? "framed" : "secure tube"}
         </div>
 
-        {key === "sports" ? (
+        {isPhoto ? (
           <>
-          <label className="block mt-6 font-semibold text-sm">Athlete's name
-            <input className="field mt-1" placeholder="e.g. TOM KID"
+          <label className="block mt-6 font-semibold text-sm">
+            {key === "custom" ? "Title line" : "Athlete's name"}
+            <input className="field mt-1" placeholder={key === "custom" ? "e.g. 1972 FORD BRONCO" : "e.g. TOM KID"}
                    maxLength={24}
                    value={athlete}
                    onChange={e => setAthlete(e.target.value)} />
@@ -287,7 +292,7 @@ export default function Create() {
             School, team, or a short line{" "}
             <span className="caption font-normal">(optional)</span>
             <input className="field mt-1"
-                   placeholder="e.g. EAGLES — 14U LEAGUE MVP"
+                   placeholder={key === "custom" ? "e.g. 302 V8 \u2014 UNCUT" : "e.g. EAGLES — 14U LEAGUE MVP"}
                    maxLength={30}
                    value={line2}
                    onChange={e => setLine2(e.target.value)} />
@@ -410,7 +415,7 @@ export default function Create() {
         )}
         {session && !ready && (
           <p className="caption mt-2 text-center">
-            {key === "sports"
+            {isPhoto
               ? "Add a photo above to unlock checkout."
               : "Enter your city above to unlock checkout."}
           </p>
