@@ -25,7 +25,7 @@ type Slide = {
 const SLIDES: Slide[] = [
   { kind: "logo", tone: "dark",
     kicker: "Plotted, not printed",
-    head: ["Drawn the way we", "draw everything."],
+    head: ["Our own software,", "individually edited."],
     ghost: { href: "#how", label: "See the process" } },
   { kind: "art", img: "/gallery/hero-basketball.jpg",
     alt: "Hand-plotted basketball portrait, Eagles 14, framed",
