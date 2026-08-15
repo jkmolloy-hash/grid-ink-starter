@@ -4,14 +4,44 @@ import HeroCarousel from "@/components/HeroCarousel";
 import CategoryTiles from "@/components/CategoryTiles";
 import NewsletterBand from "@/components/NewsletterBand";
 import { NibMark, PenRule } from "@/components/NibMark";
+import Seo from "@/components/Seo";
 
 export default function Index() {
   const money = (c: number) =>
     (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
+  const productLd = {
+    "@context": "https://schema.org",
+    "@graph": (Object.values(PRODUCTS) as typeof PRODUCTS[keyof typeof PRODUCTS][]).map((p) => ({
+      "@type": "Product",
+      name: p.name,
+      description: p.blurb,
+      size: p.size,
+      material: "Archival paper",
+      brand: { "@type": "Brand", name: "Grid & Ink Co." },
+      offers: {
+        "@type": "Offer",
+        price: (p.priceCents / 100).toFixed(2),
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: "https://www.gridandinkco.com/create",
+      },
+    })),
+  };
   return (
     <div>
+      <Seo
+        title="Grid & Ink Co. — Hand-Plotted Varsity Portraits & City Maps"
+        description="Your photo drawn as one continuous pen line on archival paper. Hand-plotted varsity portraits and custom city map art — $98 with shipping included."
+        path="/"
+      >
+        <script type="application/ld+json">{JSON.stringify(productLd)}</script>
+      </Seo>
+      <h1 className="sr-only">
+        Grid &amp; Ink Co. — hand-plotted varsity portraits and custom city map art
+      </h1>
       <HeroCarousel />
       <CategoryTiles />
+
 
       {/* HOW IT WORKS */}
       <section id="how" className="bg-paper border-y border-ink/10 mt-14">
