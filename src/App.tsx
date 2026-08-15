@@ -1,5 +1,5 @@
 import { useEffect, useState, createContext, useContext } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import Nav from "@/components/Nav";
@@ -30,6 +30,12 @@ export const useSession = () => useContext(SessionCtx);
   } catch { }
 })();
 
+function ScrollToTop() {
+  const { pathname, search } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname, search]);
+  return null;
+}
+
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   useEffect(() => {
@@ -42,6 +48,7 @@ export default function App() {
   return (
     <SessionCtx.Provider value={session}>
       <div className="min-h-screen flex flex-col">
+        <ScrollToTop />
         <Nav />
         <main className="flex-1">
           <Routes>
