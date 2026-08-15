@@ -13,6 +13,22 @@ import Contact from "@/pages/Contact";
 
 const SessionCtx = createContext<Session | null>(null);
 export const useSession = () => useContext(SessionCtx);
+(() => {
+  try {
+    const r = new URLSearchParams(window.location.search).get("ref");
+    if (r) {
+      localStorage.setItem("gridink_ref",
+        r.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40));
+      localStorage.setItem("gridink_ref_at", String(Date.now()));
+    } else {
+      const at = +(localStorage.getItem("gridink_ref_at") ?? 0);
+      if (at && Date.now() - at > 90 * 864e5) {
+        localStorage.removeItem("gridink_ref");
+        localStorage.removeItem("gridink_ref_at");
+      }
+    }
+  } catch { }
+})();
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
