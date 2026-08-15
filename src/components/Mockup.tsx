@@ -113,7 +113,7 @@ export default function Mockup(p: Props) {
       }
       hits.current.logo = { x: lx, y: ly, w: lw, h: lh };
     }
-  }, [photo, logo, logoAlpha, p.name, p.line2, p.inkArt, p.inkText, p.layout]);
+  }, [photo, logo, logoAlpha, p.name, p.line2, p.inkArt, p.inkText, p.layout, p.sheet]);
 
   function toCanvas(e: React.PointerEvent): { x: number; y: number } {
     const r = ref.current!.getBoundingClientRect();
