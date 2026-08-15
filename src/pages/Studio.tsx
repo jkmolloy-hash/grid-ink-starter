@@ -10,6 +10,7 @@ import { BRAND } from "@/config";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useSession } from "@/App";
+import Seo from "@/components/Seo";
 
 type StudioOrder = {
   id: string; created_at: string; status: string; email: string;
@@ -223,6 +224,7 @@ export default function Studio() {
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-10">
+      <Seo title="The Studio | Grid & Ink Co." description="Internal studio queue for Grid & Ink Co. orders." path="/studio" noindex />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="caption">Grid &amp; Ink</div>

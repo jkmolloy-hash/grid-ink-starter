@@ -5,6 +5,7 @@ import { useSession } from "@/App";
 import Mockup, { DEFAULT_LAYOUT, type Layout } from "@/components/Mockup";
 import MapPicker, { type MapFrame } from "@/components/MapPicker";
 import { PRODUCTS, TURNAROUND, type ProductKey, BRAND } from "@/config";
+import Seo from "@/components/Seo";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
@@ -207,6 +208,7 @@ export default function Create() {
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-12 grid lg:grid-cols-[1fr_380px] gap-10">
+      <Seo title="Create Your Piece | Grid & Ink Co." description="Upload a photo or name a place, choose inks and layout, and see your hand-plotted piece before we draw it. $98, shipping included." path="/create" />
       {/* LEFT — the sheet */}
       <div className="flex flex-col items-center">
         {isPhoto ? (
