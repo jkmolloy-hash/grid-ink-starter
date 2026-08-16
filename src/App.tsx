@@ -60,6 +60,8 @@ export default function App() {
             <Route path="/account" element={<Account />} />
             <Route path="/studio" element={<Studio />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/team/:slug" element={<TeamPage />} />
           </Routes>
         </main>
         <Footer />
