@@ -10,6 +10,8 @@ import Auth from "@/pages/Auth";
 import Account from "@/pages/Account";
 import Studio from "@/pages/Studio";
 import Contact from "@/pages/Contact";
+import Teams from "@/pages/Teams";
+import TeamPage from "@/pages/TeamPage";
 
 const SessionCtx = createContext<Session | null>(null);
 export const useSession = () => useContext(SessionCtx);
@@ -58,6 +60,8 @@ export default function App() {
             <Route path="/account" element={<Account />} />
             <Route path="/studio" element={<Studio />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/team/:slug" element={<TeamPage />} />
           </Routes>
         </main>
         <Footer />
