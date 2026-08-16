@@ -146,6 +146,9 @@ export default function Studio() {
     const mb = await supabase.from("contact_messages").select("*")
       .order("created_at", { ascending: false }).limit(50);
     setInbox((mb.data ?? []) as Msg[]);
+    const tp = await supabase.from("team_pages").select("*")
+      .order("created_at", { ascending: false });
+    setTeams((tp.data ?? []) as TeamRow[]);
   }
 
   useEffect(() => {
