@@ -71,6 +71,23 @@ export const PRODUCTS: Record<ProductKey, {
 
 export const PRODUCT = PRODUCTS.sports;  // legacy alias
 
+/* Team fundraiser posters live OUTSIDE the catalog on purpose: the
+   homepage renders a card for every entry in PRODUCTS, and team pages
+   are unlisted — reached by their own link, never browsed. */
+export const TEAM_PRODUCT = {
+  name: "Team Line Art Poster",
+  sizes: { portrait: '12" x 18"', landscape: '18" x 12"' },
+  defaultOrientation: "landscape" as "portrait" | "landscape",
+  inkLabel: "two inks",
+  shippingCents: 0,
+  shipMethod: "Framed, protected flat pack",
+  shippingOptions: [
+    { label: "US shipping — included", amountCents: 0,
+      estDays: [5, 8] },
+  ] as ShippingOption[],
+  framed: true,
+};
+
 export const BRAND = {
   name: "GRID & INK CO.",
   tagline: "One pen. One line at a time. No two alike.",
