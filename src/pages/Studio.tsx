@@ -366,6 +366,111 @@ export default function Studio() {
 
       <div className="mt-14">
         <div className="flex items-center gap-3">
+          <h2 className="font-display text-xl font-bold">Team pages</h2>
+          <span className="caption">
+            unlisted &middot; share the link, 20% back to the team
+          </span>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3
+                        bg-paper rounded border border-ink/10 p-4">
+          <input className="field" placeholder="slug (e.g. crms-blue)"
+                 value={tForm.slug}
+                 onChange={e => setTForm({ ...tForm,
+                   slug: e.target.value.toLowerCase()
+                     .replace(/[^a-z0-9-]/g, "-").slice(0, 40) })} />
+          <input className="field" placeholder="Title (team name)"
+                 value={tForm.title}
+                 onChange={e => setTForm({ ...tForm, title: e.target.value })} />
+          <input className="field" placeholder="Subtitle (record, season)"
+                 value={tForm.subtitle}
+                 onChange={e => setTForm({ ...tForm, subtitle: e.target.value })} />
+          <input className="field" placeholder="Art URL (/gallery/x.jpg)"
+                 value={tForm.art_url}
+                 onChange={e => setTForm({ ...tForm, art_url: e.target.value })} />
+          <input className="field" placeholder="Team ref code (e.g. crms)"
+                 value={tForm.ref_code}
+                 onChange={e => setTForm({ ...tForm,
+                   ref_code: e.target.value.toLowerCase()
+                     .replace(/[^a-z0-9_-]/g, "") })} />
+          <input className="field" type="date"
+                 value={tForm.closes_at}
+                 onChange={e => setTForm({ ...tForm, closes_at: e.target.value })} />
+          <div className="sm:col-span-2 lg:col-span-3 flex items-center gap-3">
+            <button className="btn !py-2"
+                    disabled={!tForm.slug || !tForm.title || !tForm.art_url
+                              || !tForm.ref_code}
+                    onClick={async () => {
+                      const r = await supabase.from("team_pages").insert({
+                        slug: tForm.slug, title: tForm.title,
+                        subtitle: tForm.subtitle || null,
+                        art_url: tForm.art_url, ref_code: tForm.ref_code,
+                        closes_at: tForm.closes_at
+                          ? new Date(tForm.closes_at + "T23:59:59").toISOString()
+                          : null,
+                      });
+                      if (r.error) { setTMsg(r.error.message); return; }
+                      setTMsg("Page created.");
+                      setTForm({ slug: "", title: "", subtitle: "",
+                        art_url: "", ref_code: "", closes_at: "" });
+                      refresh();
+                    }}>
+              Create team page
+            </button>
+            {tMsg && <span className="caption">{tMsg}</span>}
+          </div>
+        </div>
+        {teams.length === 0 && (
+          <p className="caption mt-3">No team pages yet.</p>
+        )}
+        <div className="mt-4 space-y-2">
+          {teams.map(t => {
+            const sold = orders.filter(o => o.team_slug === t.slug
+              && o.status !== "pending_payment" && o.status !== "cancelled");
+            const net = sold.reduce((a, o) =>
+              a + ((o.price_cents ?? 0) - (o.discount_cents ?? 0)), 0);
+            const link = `${window.location.origin}/team/${t.slug}`;
+            return (
+              <div key={t.slug}
+                   className="bg-paper rounded border border-ink/10 px-4 py-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="font-semibold">{t.title}</span>
+                  <span className="caption">{sold.length} sold</span>
+                  <span className="caption">
+                    ${(net / 100).toFixed(2)} collected
+                  </span>
+                  <span className="caption">
+                    team earns ${(net * 0.2 / 100).toFixed(2)}
+                  </span>
+                  <span className="ml-auto caption">
+                    {t.closes_at
+                      ? `closes ${t.closes_at.slice(0, 10)}`
+                      : "no deadline"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 mt-2">
+                  <code className="text-xs">{link}</code>
+                  <button className="caption underline"
+                          onClick={() => navigator.clipboard?.writeText(link)}>
+                    Copy link
+                  </button>
+                  <button className="caption underline"
+                          onClick={async () => {
+                            await supabase.from("team_pages")
+                              .update({ active: !t.active }).eq("slug", t.slug);
+                            refresh();
+                          }}>
+                    {t.active ? "Close ordering" : "Reopen"}
+                  </button>
+                  {!t.active && <span className="caption">closed</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-14">
+        <div className="flex items-center gap-3">
           <h2 className="font-display text-xl font-bold">Inbox</h2>
           <span className="caption">from the contact form</span>
         </div>
