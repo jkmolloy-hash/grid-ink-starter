@@ -119,6 +119,11 @@ export default function Studio() {
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const [inbox, setInbox] = useState<Msg[]>([]);
+  const [teams, setTeams] = useState<TeamRow[]>([]);
+  const [tForm, setTForm] = useState({
+    slug: "", title: "", subtitle: "", art_url: "",
+    ref_code: "", closes_at: "" });
+  const [tMsg, setTMsg] = useState("");
 
   async function refresh() {
     const q = await supabase.rpc("studio_orders");
