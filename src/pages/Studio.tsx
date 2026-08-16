@@ -25,6 +25,14 @@ type StudioOrder = {
   map_frame: { bbox: [number, number, number, number];
                title?: string; orientation?: string } | null;
   size_label: string | null;
+  discount_cents: number | null; price_cents: number | null;
+  team_slug: string | null;
+};
+
+type TeamRow = {
+  slug: string; title: string; subtitle: string | null;
+  art_url: string; price_cents: number; ref_code: string;
+  closes_at: string | null; active: boolean;
 };
 
 function FrameMini({ frame }:
