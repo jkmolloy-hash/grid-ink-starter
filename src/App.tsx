@@ -62,6 +62,8 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/teams" element={<Teams />} />
             <Route path="/team/:slug" element={<TeamPage />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/team/:slug" element={<TeamPage />} />
           </Routes>
         </main>
         <Footer />
