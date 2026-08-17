@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { BRAND } from "@/config";
-import Seo from "@/components/Seo";
 
 export default function Contact() {
   const [name, setName] = useState("");
@@ -25,7 +24,6 @@ export default function Contact() {
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-14">
-      <Seo title="Contact the Studio | Grid & Ink Co." description="Questions about a commission, sizing, or an order in progress? Message the Grid & Ink Co. studio and we'll reply from the bench." path="/contact" />
       <div className="caption">Grid &amp; Ink Co.</div>
       <h1 className="font-display text-3xl font-bold mt-1">Contact the studio</h1>
       <p className="mt-3 text-ink/70">

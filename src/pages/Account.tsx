@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
-import Seo from "@/components/Seo";
 
 interface OrderRow {
   id: string; product_name: string; size_label: string;
@@ -71,7 +70,6 @@ export default function Account() {
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-12">
-      <Seo title="Your Account | Grid & Ink Co." description="Track your Grid & Ink Co. orders and approve proofs." path="/account" noindex />
       {params.get("paid") && (
         <div className="bg-paper border border-ink/10 rounded-md shadow-sheet
                         p-4 mb-8 font-semibold">

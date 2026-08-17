@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
-import Mockup, { DEFAULT_LAYOUT, type Layout } from "@/components/Mockup";
+import { checkPhoto, type PhotoVerdict } from "@/lib/photocheck";
+import SchoolPicker, { type SchoolPick } from "@/components/SchoolPicker";
 import MapPicker, { type MapFrame } from "@/components/MapPicker";
 import { PRODUCTS, TURNAROUND, type ProductKey, BRAND } from "@/config";
-import Seo from "@/components/Seo";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
@@ -65,7 +65,9 @@ export default function Create() {
   const [colorMode, setColorMode] = useState<"single" | "two">("single");
   const [inkArt, setInkArt] = useState("#082b4a");
   const [inkText, setInkText] = useState("#082b4a");
-  const [layout, setLayout] = useState<Layout>(DEFAULT_LAYOUT);
+  const [verdict, setVerdict] = useState<PhotoVerdict | null>(null);
+  const [school, setSchool] = useState<SchoolPick | null>(null);
+  const [sport, setSport] = useState("");
   const frameRef = useRef<(() => MapFrame) | null>(null);
   const [fly, setFly] = useState<{ lat: number; lng: number } | null>(null);
   const [geoBusy, setGeoBusy] = useState(false);
@@ -92,8 +94,9 @@ export default function Create() {
         + "A JPG or PNG version will work.");
     };
     img.onload = () => {
-      setLowRes(Math.min(img.naturalWidth, img.naturalHeight) < 1200
-        ? { w: img.naturalWidth, h: img.naturalHeight } : null);
+      const v = checkPhoto(img, f.size);
+      setVerdict(v);
+      setLowRes(null);
       setPhotoUrl(img.src);
       setHasPhoto(true);
     };
@@ -127,7 +130,9 @@ export default function Create() {
     setGeoBusy(false);
   }
 
-  const ready = isPhoto ? hasPhoto : cityName.trim().length > 1;
+  const ready = isPhoto
+    ? (hasPhoto && verdict?.level !== "reject")
+    : cityName.trim().length > 1;
 
   async function checkout() {
     if (!session || !ready) return;
@@ -138,6 +143,9 @@ export default function Create() {
         product_key: key,
         product_name: product.name,
         size_label: product.sizes[orient],
+        ref_code: (() => { try {
+          return localStorage.getItem("gridink_ref"); } catch { return null; }
+        })(),
         price_cents: product.priceCents,
         shipping_cents: product.shippingCents,
         ship_method: product.shipMethod,
@@ -147,7 +155,11 @@ export default function Create() {
         color_mode: isPhoto ? colorMode : null,
         ink_art: isPhoto ? (colorMode === "two" ? inkArt : inkText) : null,
         ink_text: isPhoto ? inkText : null,
-        layout: isPhoto ? layout : null,
+        layout: null,
+        school_name: school?.name ?? null,
+        school_address: school?.address ?? null,
+        sport: sport || null,
+        photo_quality: verdict?.summary ?? null,
         map_frame: key === "city" && frameRef.current
           ? { v: 2, ...(() => { const f = frameRef.current!();
               return { bbox: f.bbox, center: f.center, zoom: f.zoom }; })(),
@@ -208,7 +220,6 @@ export default function Create() {
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-12 grid lg:grid-cols-[1fr_380px] gap-10">
-      <Seo title="Create Your Piece | Grid & Ink Co." description="Upload a photo or name a place, choose inks and layout, and see your hand-plotted piece before we draw it. $98, shipping included." path="/create" />
       {/* LEFT — the sheet */}
       <div className="flex flex-col items-center">
         {isPhoto ? (
@@ -226,38 +237,84 @@ export default function Create() {
                   ? "A clean side or three-quarter view works best. Get the whole subject in frame, nothing cropped."
                   : "Fill the frame with the athlete. Action or posed both work; skip distant, full-field shots."}</span>
               <span className="caption opacity-80 text-center px-6">
-                Best at 1500&nbsp;px or larger on the short side
-                (any recent phone photo)
+                The original photo from your camera roll &mdash; 1500&nbsp;px
+                or larger on the short side. Not a screenshot, not a frame
+                grabbed from a video, not a zoomed-in crop. We check it
+                before you can order.
               </span>
               <input type="file" accept="image/*" className="hidden"
                      onChange={e => onFile(e.target.files?.[0])} />
             </label>
           ) : (
             <>
-              <Mockup sheet={orient}
-                      photoUrl={photoUrl} name={athlete} line2={line2}
-                      logoUrl={logoUrl}
-                      inkArt={colorMode === "two" ? inkArt : inkText}
-                      inkText={inkText}
-                      layout={layout} onLayout={setLayout} />
-              <p className="caption mt-3 text-center max-w-md">
-                Layout preview &mdash; drag the name, line and logo where you
-                want them. The finished piece is hand-plotted line art, drawn
-                from this photo.
-              </p>
-              {lowRes && (
-                <p className="caption mt-3 text-center max-w-md"
-                   style={{ color: "#b45309" }}>
-                  This photo is {lowRes.w}&times;{lowRes.h}px &mdash; on the
-                  small side. It will still plot, but a larger original keeps
-                  the line detail crisp.
-                </p>
-              )}
-              <label className="caption mt-4 cursor-pointer hover:text-ink">
-                Use a different photo
-                <input type="file" accept="image/*" className="hidden"
-                       onChange={e => onFile(e.target.files?.[0])} />
-              </label>
+              <div className="w-full max-w-md">
+                <div className="caption">Your photo</div>
+                <div className="mt-2 rounded-md overflow-hidden border
+                                border-ink/15 bg-paper">
+                  <img src={photoUrl} alt="The photo you uploaded"
+                       className="block w-full h-auto" draggable={false} />
+                </div>
+
+                {verdict && (
+                  <div className={"mt-3 rounded-md border px-4 py-3 "
+                    + (verdict.level === "reject"
+                       ? "border-[#c1121f]/40 bg-[#c1121f]/5"
+                       : verdict.level === "warn"
+                       ? "border-[#b45309]/40 bg-[#b45309]/5"
+                       : "border-ink/15 bg-paper")}>
+                    <div className="font-semibold text-sm">
+                      {verdict.headline}
+                    </div>
+                    {verdict.reasons.map((r, i) => (
+                      <p key={i} className="caption mt-1">{r}</p>
+                    ))}
+                    {verdict.level === "reject" && (
+                      <p className="caption mt-2">
+                        Please upload the original photo from the camera
+                        roll &mdash; not a screenshot, not a frame from a
+                        video, not a zoomed-in crop.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <label className="caption mt-3 inline-block cursor-pointer
+                                  underline hover:text-ink">
+                  Use a different photo
+                  <input type="file" accept="image/*" className="hidden"
+                         onChange={e => onFile(e.target.files?.[0])} />
+                </label>
+
+                <div className="mt-8 border-t border-ink/10 pt-6">
+                  <div className="font-semibold text-sm">
+                    What the pen makes of it
+                  </div>
+                  <p className="caption mt-1">
+                    We don&rsquo;t show a fake preview &mdash; these are real
+                    plotted pieces. Yours is drawn from your photo in the
+                    same hand.
+                  </p>
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {["/gallery/hero-basketball.jpg",
+                      "/gallery/hero-football.jpg",
+                      "/gallery/hero-defender.jpg"].map(src => (
+                      <div key={src}
+                           className="rounded border border-ink/15 bg-white
+                                      overflow-hidden">
+                        <img src={src} alt="A finished plotted piece"
+                             className="block w-full h-28 object-cover"
+                             draggable={false} />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="caption mt-4">
+                    <span className="font-semibold">Before we plot yours,</span>
+                    {" "}we send a proof of the actual artwork &mdash; the
+                    real line art, your lettering, your logo &mdash; and
+                    nothing goes on paper until you approve it.
+                  </p>
+                </div>
+              </div>
             </>
           )
         ) : (
@@ -323,9 +380,38 @@ export default function Create() {
               {line2.length}/30 &middot; drawn in varsity lettering
             </span>
           </label>
-          <div className="mt-3">
+          {key === "sports" && (
+            <div className="mt-5">
+              <div className="font-semibold text-sm">
+                School or club{" "}
+                <span className="caption font-normal">(optional)</span>
+              </div>
+              <p className="caption mt-1">
+                Tell us which one and we&rsquo;ll source the crest
+                ourselves &mdash; you&rsquo;ll see it on the proof before
+                anything is plotted.
+              </p>
+              <SchoolPicker value={school} onPick={setSchool} />
+              {school && (
+                <label className="block mt-3 font-semibold text-sm">
+                  Sport
+                  <select className="field mt-1" value={sport}
+                          onChange={e => setSport(e.target.value)}>
+                    <option value="">Choose a sport…</option>
+                    {["Football", "Basketball", "Baseball", "Softball",
+                      "Soccer", "Volleyball", "Track & Field",
+                      "Cross Country", "Wrestling", "Swimming", "Tennis",
+                      "Golf", "Lacrosse", "Hockey", "Cheer", "Other"]
+                      .map(x => <option key={x} value={x}>{x}</option>)}
+                  </select>
+                </label>
+              )}
+            </div>
+          )}
+
+          <div className="mt-5">
             <div className="font-semibold text-sm">
-              School or team logo{" "}
+              Your own logo file{" "}
               <span className="caption font-normal">(optional)</span>
             </div>
             {!logoUrl ? (
@@ -334,8 +420,8 @@ export default function Create() {
                                 hover:border-ink/60 transition">
                 <span className="text-xl leading-none">&#65291;</span>
                 <span className="caption">
-                  PNG or JPG &mdash; a simple crest or mascot plots best;
-                  transparent PNG is ideal
+                  Only if you have one &mdash; PNG or JPG, a simple crest
+                  or mascot plots best
                 </span>
                 <input type="file" accept="image/*" className="hidden"
                        onChange={e => onLogo(e.target.files?.[0])} />
@@ -439,7 +525,9 @@ export default function Create() {
         {session && !ready && (
           <p className="caption mt-2 text-center">
             {isPhoto
-              ? "Add a photo above to unlock checkout."
+              ? (verdict?.level === "reject"
+                 ? "Upload a higher-quality photo to unlock checkout."
+                 : "Add a photo above to unlock checkout.")
               : "Enter your city above to unlock checkout."}
           </p>
         )}

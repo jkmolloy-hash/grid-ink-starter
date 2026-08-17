@@ -149,8 +149,6 @@ export default function Mockup(p: Props) {
 
   return (
     <canvas ref={ref} width={W} height={H}
-            role="img"
-            aria-label="Interactive preview of your line-art composition — drag the name and text to reposition them"
             className="w-full max-w-md rounded-md shadow-sheet border
                        border-ink/10 touch-none cursor-grab"
             onPointerDown={down} onPointerMove={move}

@@ -82,7 +82,7 @@ export const TEAM_PRODUCT = {
   shippingCents: 0,
   shipMethod: "Framed, protected flat pack",
   shippingOptions: [
-    { label: "US shipping — included", amountCents: 0,
+    { label: "US shipping \u2014 included", amountCents: 0,
       estDays: [5, 8] },
   ] as ShippingOption[],
   framed: true,

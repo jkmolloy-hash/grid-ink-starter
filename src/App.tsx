@@ -15,6 +15,10 @@ import TeamPage from "@/pages/TeamPage";
 
 const SessionCtx = createContext<Session | null>(null);
 export const useSession = () => useContext(SessionCtx);
+
+// Referral capture: a visit via /?ref=rashad is remembered for 90 days
+// and stamped on any order this browser places. No code, no discount —
+// pure attribution for commission sellers.
 (() => {
   try {
     const r = new URLSearchParams(window.location.search).get("ref");
@@ -29,7 +33,7 @@ export const useSession = () => useContext(SessionCtx);
         localStorage.removeItem("gridink_ref_at");
       }
     }
-  } catch { }
+  } catch { /* private browsing: attribution just doesn't persist */ }
 })();
 
 function ScrollToTop() {

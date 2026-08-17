@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import Seo from "@/components/Seo";
 
 export default function Auth() {
   const nav = useNavigate();
@@ -10,6 +9,7 @@ export default function Auth() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -27,7 +27,6 @@ export default function Auth() {
 
   return (
     <div className="max-w-md mx-auto px-5 py-16">
-      <Seo title="Sign In | Grid & Ink Co." description="Sign in to your Grid & Ink Co. account to approve proofs and track orders." path="/auth" noindex />
       <div className="bg-paper rounded-lg shadow-sheet border border-ink/10 p-8">
         <div className="caption">Grid &amp; Ink account</div>
         <h1 className="text-2xl font-extrabold mt-1">
@@ -38,8 +37,16 @@ export default function Auth() {
                  onChange={e => setEmail(e.target.value)} />
         </label>
         <label className="block mt-4 font-semibold text-sm">Password
-          <input className="field mt-1" type="password" value={password}
+<div className="relative">
+                      <input className="field mt-1 pr-16" type={showPw ? "text" : "password"} value={password}
                  onChange={e => setPassword(e.target.value)} />
+            <button type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2
+                               caption underline"
+                    onClick={() => setShowPw(v => !v)}>
+              {showPw ? "Hide" : "Show"}
+            </button>
+          </div>
         </label>
         {msg && <div className="mt-4 text-sm font-semibold text-accent">{msg}</div>}
         <button className="btn-ink w-full mt-6" disabled={busy || !email || !password}

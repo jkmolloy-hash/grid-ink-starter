@@ -10,7 +10,6 @@ import { BRAND } from "@/config";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useSession } from "@/App";
-import Seo from "@/components/Seo";
 
 type StudioOrder = {
   id: string; created_at: string; status: string; email: string;
@@ -25,14 +24,17 @@ type StudioOrder = {
   map_frame: { bbox: [number, number, number, number];
                title?: string; orientation?: string } | null;
   size_label: string | null;
+  ref_code: string | null; promo_code: string | null;
   discount_cents: number | null; price_cents: number | null;
   team_slug: string | null;
+  school_name: string | null; school_address: string | null;
+  sport: string | null; photo_quality: string | null;
 };
 
 type TeamRow = {
   slug: string; title: string; subtitle: string | null;
   art_url: string; price_cents: number; ref_code: string;
-  closes_at: string | null; active: boolean;
+  closes_at: string | null; active: boolean; personalize: boolean;
 };
 
 function FrameMini({ frame }:
@@ -119,6 +121,7 @@ export default function Studio() {
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const [inbox, setInbox] = useState<Msg[]>([]);
+  const [subs, setSubs] = useState<{ email: string; created_at: string }[]>([]);
   const [teams, setTeams] = useState<TeamRow[]>([]);
   const [tForm, setTForm] = useState({
     slug: "", title: "", subtitle: "", art_url: "",
@@ -146,6 +149,10 @@ export default function Studio() {
     const mb = await supabase.from("contact_messages").select("*")
       .order("created_at", { ascending: false }).limit(50);
     setInbox((mb.data ?? []) as Msg[]);
+    const ns = await supabase.from("newsletter_signups")
+      .select("email, created_at")
+      .order("created_at", { ascending: false });
+    setSubs(ns.data ?? []);
     const tp = await supabase.from("team_pages").select("*")
       .order("created_at", { ascending: false });
     setTeams((tp.data ?? []) as TeamRow[]);
@@ -240,7 +247,6 @@ export default function Studio() {
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-10">
-      <Seo title="The Studio | Grid & Ink Co." description="Internal studio queue for Grid & Ink Co. orders." path="/studio" noindex />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="caption">Grid &amp; Ink</div>
@@ -294,6 +300,16 @@ export default function Studio() {
                       <span className="h-4 w-4 rounded border border-ink/20 inline-block"
                             style={{ background: o.ink_text }} />)}
                   </div>
+                  {o.school_name && (
+                    <div className="caption mt-2">
+                      <span className="font-semibold">Logo needed:</span>{" "}
+                      {o.school_name}{o.sport ? ` \u2014 ${o.sport}` : ""}
+                      <span className="block">{o.school_address}</span>
+                    </div>
+                  )}
+                  {o.photo_quality && (
+                    <div className="caption mt-1">Photo: {o.photo_quality}</div>
+                  )}
                   {o.notes && <div className="caption mt-2">Note: {o.notes}</div>}
                   {o.change_request && (
                     <div className="mt-3 text-sm rounded border border-[#c1121f]/40 bg-[#c1121f]/5 p-3">
@@ -366,11 +382,47 @@ export default function Studio() {
 
       <div className="mt-14">
         <div className="flex items-center gap-3">
+          <h2 className="font-display text-xl font-bold">Inbox</h2>
+          <span className="caption">from the contact form</span>
+        </div>
+        {inbox.length === 0 && (
+          <p className="caption mt-3">No messages.</p>
+        )}
+        <div className="mt-4 space-y-4">
+          {inbox.map(m => (
+            <div key={m.id}
+                 className="bg-paper rounded-lg border border-ink/10
+                            shadow-sheet p-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="font-semibold">{m.name}</span>
+                <span className="caption">{m.email}</span>
+                <span className="caption">{m.created_at.slice(0, 10)}</span>
+                <a className="caption underline ml-auto"
+                   target="_blank" rel="noreferrer"
+                   href={"https://mail.google.com/mail/u/" + BRAND.email
+                     + "/?view=cm&fs=1&to=" + encodeURIComponent(m.email)
+                     + "&su=" + encodeURIComponent(
+                         "Re: your note to Grid & Ink")
+                     + "&body=" + encodeURIComponent(
+                         "\n\n\u2014 your note:\n> "
+                         + m.message.slice(0, 500))}>
+                  Reply from the studio
+                </a>
+              </div>
+              <p className="mt-2 text-sm whitespace-pre-wrap">{m.message}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-14">
+        <div className="flex items-center gap-3">
           <h2 className="font-display text-xl font-bold">Team pages</h2>
           <span className="caption">
             unlisted &middot; share the link, 20% back to the team
           </span>
         </div>
+
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3
                         bg-paper rounded border border-ink/10 p-4">
           <input className="field" placeholder="slug (e.g. crms-blue)"
@@ -419,6 +471,7 @@ export default function Studio() {
             {tMsg && <span className="caption">{tMsg}</span>}
           </div>
         </div>
+
         {teams.length === 0 && (
           <p className="caption mt-3">No team pages yet.</p>
         )}
@@ -471,34 +524,78 @@ export default function Studio() {
 
       <div className="mt-14">
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-xl font-bold">Inbox</h2>
-          <span className="caption">from the contact form</span>
+          <h2 className="font-display text-xl font-bold">Referrals</h2>
+          <span className="caption">
+            commission sales &middot; 20% of the amount paid
+          </span>
         </div>
-        {inbox.length === 0 && (
-          <p className="caption mt-3">No messages.</p>
+        {(() => {
+          const sold = orders.filter(o =>
+            o.ref_code && o.status !== "pending_payment"
+            && o.status !== "cancelled");
+          if (!sold.length)
+            return <p className="caption mt-3">
+              No referral sales yet. Share links like
+              /?ref=rashad &mdash; orders from those visits land here.
+            </p>;
+          const by: Record<string, { n: number; net: number }> = {};
+          for (const o of sold) {
+            const net = (o.price_cents ?? 0) - (o.discount_cents ?? 0);
+            by[o.ref_code!] = { n: (by[o.ref_code!]?.n ?? 0) + 1,
+                                net: (by[o.ref_code!]?.net ?? 0) + net };
+          }
+          return (
+            <div className="mt-4 space-y-2">
+              {Object.entries(by).map(([code, v]) => (
+                <div key={code}
+                     className="bg-paper rounded border border-ink/10 px-4
+                                py-2 flex flex-wrap items-center gap-4">
+                  <span className="font-mono font-semibold">{code}</span>
+                  <span className="caption">{v.n} sale{v.n > 1 ? "s" : ""}</span>
+                  <span className="caption">
+                    ${(v.net / 100).toFixed(2)} collected
+                  </span>
+                  <span className="ml-auto font-semibold">
+                    owed ${(v.net * 0.2 / 100).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+      </div>
+
+      <div className="mt-14">
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-xl font-bold">Subscribers</h2>
+          <span className="caption">
+            {subs.length} on the list &middot; 10% welcome offer
+          </span>
+          {subs.length > 0 && (
+            <button className="caption underline ml-auto"
+                    onClick={() => {
+                      const csv = "Email,Signed up\n" + subs.map(x =>
+                        `${x.email},${x.created_at.slice(0, 10)}`).join("\n");
+                      const a = document.createElement("a");
+                      a.href = URL.createObjectURL(
+                        new Blob([csv], { type: "text/csv" }));
+                      a.download = "gridink-subscribers.csv";
+                      a.click();
+                    }}>
+              Download CSV
+            </button>
+          )}
+        </div>
+        {subs.length === 0 && (
+          <p className="caption mt-3">No subscribers yet.</p>
         )}
-        <div className="mt-4 space-y-4">
-          {inbox.map(m => (
-            <div key={m.id}
-                 className="bg-paper rounded-lg border border-ink/10
-                            shadow-sheet p-5">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="font-semibold">{m.name}</span>
-                <span className="caption">{m.email}</span>
-                <span className="caption">{m.created_at.slice(0, 10)}</span>
-                <a className="caption underline ml-auto"
-                   target="_blank" rel="noreferrer"
-                   href={"https://mail.google.com/mail/u/" + BRAND.email
-                     + "/?view=cm&fs=1&to=" + encodeURIComponent(m.email)
-                     + "&su=" + encodeURIComponent(
-                         "Re: your note to Grid & Ink")
-                     + "&body=" + encodeURIComponent(
-                         "\n\n\u2014 your note:\n> "
-                         + m.message.slice(0, 500))}>
-                  Reply from the studio
-                </a>
-              </div>
-              <p className="mt-2 text-sm whitespace-pre-wrap">{m.message}</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {subs.slice(0, 60).map(x => (
+            <div key={x.email}
+                 className="bg-paper rounded border border-ink/10 px-4 py-2
+                            flex items-center justify-between">
+              <span className="text-sm">{x.email}</span>
+              <span className="caption">{x.created_at.slice(0, 10)}</span>
             </div>
           ))}
         </div>

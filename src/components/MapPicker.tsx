@@ -87,8 +87,10 @@ export default function MapPicker({ frameRef, fly, title,
     <div className={"relative w-full blueprint-map "
                     + (orientation === "landscape" ? "max-w-lg" : "max-w-md")}>
       <div ref={divRef}
-           className="w-full rounded-md shadow-sheet border border-ink/10 overflow-hidden bg-[#082b4a]"
-           style={{ aspectRatio: orientation === "landscape" ? "5 / 4" : "4 / 5" }} />
+           className="w-full rounded-md shadow-sheet border border-ink/10
+                      overflow-hidden bg-[#082b4a]"
+           style={{ aspectRatio:
+             orientation === "landscape" ? "5 / 4" : "4 / 5" }} />
       {/* blueprint blue: screen-blend turns black to navy, keeps white white */}
       <div className="pointer-events-none absolute inset-0 z-[400]
                       mix-blend-screen rounded-md"

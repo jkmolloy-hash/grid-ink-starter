@@ -62,81 +62,44 @@ export default function TeamPage() {
   }, [slug]);
 
   async function reserve() {
-
     if (!page || !session || busy) return;
-
     setBusy(true); setErr("");
-
     try {
-
       const ins = await supabase.from("orders").insert({
-
         user_id: session.user.id,
-
         product_key: "team",
-
         product_name: `${TEAM_PRODUCT.name} — ${page.title}`,
-
         size_label: TEAM_PRODUCT.sizes[orient],
-
         price_cents: page.price_cents,
-
         shipping_cents: TEAM_PRODUCT.shippingCents,
-
         ship_method: TEAM_PRODUCT.shipMethod,
-
         shipping_options: TEAM_PRODUCT.shippingOptions,
-
         ref_code: page.ref_code,
-
         team_slug: page.slug,
-
         notes: notes.trim() || null,
-
         status: "pending_payment",
-
       }).select("id").single();
-
       if (ins.error) throw ins.error;
 
       const fn = await supabase.functions.invoke("create-checkout", {
-
         body: { orderId: ins.data.id },
-
       });
-
       if (fn.error) {
-
         let msg = "Checkout couldn't start.";
-
         try {
-
           const body = await (fn.error as { context: Response })
-
             .context.json();
-
           if (body?.error) msg = String(body.error);
-
         } catch { /* keep the generic message */ }
-
         throw new Error(msg);
-
       }
-
       const url = (fn.data as { url?: string })?.url;
-
       if (!url) throw new Error("No checkout link returned.");
-
       window.location.href = url;
-
     } catch (e) {
-
       setErr(e instanceof Error ? e.message : String(e));
-
       setBusy(false);
-
     }
-
   }
 
   if (state === "loading")
@@ -159,7 +122,6 @@ export default function TeamPage() {
     );
 
   const when = closesCopy(page.closes_at);
-
   const closed = when.closed || !page.active;
 
   return (
@@ -167,6 +129,7 @@ export default function TeamPage() {
       <div className="caption">Team piece &middot; one of one, plotted to order</div>
       <h1 className="font-display text-3xl font-bold mt-1">{page.title}</h1>
       {page.subtitle && <p className="mt-2 text-ink/70">{page.subtitle}</p>}
+
       <div className="mt-8 grid gap-10 md:grid-cols-2">
         <div>
           <div className="bg-[#17191c] p-[10px] rounded shadow-sheet">
@@ -180,6 +143,7 @@ export default function TeamPage() {
             individually &mdash; no two are exactly alike.
           </p>
         </div>
+
         <div>
           <div className="text-lg font-semibold">
             {money(page.price_cents)}
@@ -194,6 +158,7 @@ export default function TeamPage() {
               {when.text}
             </div>
           )}
+
           <div className="mt-6">
             <div className="font-semibold text-sm">Orientation</div>
             <div className="flex gap-2 mt-2">
@@ -210,12 +175,15 @@ export default function TeamPage() {
               ))}
             </div>
           </div>
+
+
           <label className="block mt-6 font-semibold text-sm">
             Anything we should know?
             <input className="field mt-1" maxLength={200} value={notes}
                    placeholder="Optional — a note for the studio"
                    onChange={e => setNotes(e.target.value)} />
           </label>
+
           {closed ? (
             <div className="mt-8 p-4 rounded border border-ink/15 bg-paper">
               <div className="font-semibold">Ordering has closed</div>
@@ -242,6 +210,7 @@ export default function TeamPage() {
               </p>
             </div>
           )}
+
           <p className="caption mt-6">
             A share of every piece sold goes back to the team.
           </p>
