@@ -61,7 +61,7 @@ const SLIDES: Slide[] = [
     wall: "radial-gradient(120% 90% at 40% 15%, #f2efe9 0%, #e6e1d7 55%, #d6d0c4 100%)",
     zoom: "kb-in", tone: "light",
     kicker: "From your photo",
-    head: ["Plotted once.", "Signed by hand."],
+    head: ["Plotted once.", "Never reprinted."],
     cta: { to: "/create?product=sports",
            label: `Start a portrait — ${money(PRODUCTS.sports.priceCents)}` },
     ghost: { href: "#how", label: "See the process" } },

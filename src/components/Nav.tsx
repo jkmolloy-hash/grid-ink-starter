@@ -14,6 +14,15 @@ export default function Nav() {
   }, [session]);
   const [shopOpen, setShopOpen] = useState(false);
   const shopRef = useRef<HTMLDivElement>(null);
+  const hoverT = useRef<number | null>(null);
+  /* Only devices with a real hover (mouse/trackpad) get hover-to-open;
+     on touch the menu keeps working by tap. */
+  const canHover =
+    typeof window !== "undefined" &&
+    !!window.matchMedia?.("(hover: hover)").matches;
+  useEffect(() => () => {
+    if (hoverT.current) window.clearTimeout(hoverT.current);
+  }, []);
   useEffect(() => {
     if (!shopOpen) return;
     const close = (e: MouseEvent) => {
@@ -33,7 +42,7 @@ export default function Nav() {
         <span className="opacity-40">&middot;</span>
         <span>Archival paper &amp; inks</span>
         <span className="opacity-40 hidden sm:inline">&middot;</span>
-        <span className="hidden sm:inline">Every piece one of one &middot; signed</span>
+        <span className="hidden sm:inline">Every piece one of one</span>
       </div>
     </div>
     <header className="bg-paper border-b border-ink/10">
@@ -44,7 +53,17 @@ export default function Nav() {
           <span className="caption hidden sm:inline">{BRAND.tagline}</span>
         </Link>
         <nav className="flex items-center gap-5">
-          <div className="relative" ref={shopRef}>
+          <div className="relative" ref={shopRef}
+               onMouseEnter={() => {
+                 if (!canHover) return;
+                 if (hoverT.current) window.clearTimeout(hoverT.current);
+                 setShopOpen(true);
+               }}
+               onMouseLeave={() => {
+                 if (!canHover) return;
+                 hoverT.current = window.setTimeout(
+                   () => setShopOpen(false), 180);
+               }}>
             <button
               className="font-semibold hover:underline underline-offset-4
                          flex items-center gap-1"
