@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
@@ -12,6 +12,18 @@ export default function Nav() {
     if (!session) { setStudio(false); return; }
     supabase.rpc("is_studio").then(r => setStudio(!!r.data));
   }, [session]);
+  const [shopOpen, setShopOpen] = useState(false);
+  const shopRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!shopOpen) return;
+    const close = (e: MouseEvent) => {
+      if (shopRef.current && !shopRef.current.contains(e.target as Node)) {
+        setShopOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [shopOpen]);
   return (
     <>
     <div className="bg-ink text-paper">
@@ -32,9 +44,38 @@ export default function Nav() {
           <span className="caption hidden sm:inline">{BRAND.tagline}</span>
         </Link>
         <nav className="flex items-center gap-5">
-          <Link to="/create" className="font-semibold hover:underline underline-offset-4">
-            Create yours
-          </Link>
+          <div className="relative" ref={shopRef}>
+            <button
+              className="font-semibold hover:underline underline-offset-4
+                         flex items-center gap-1"
+              aria-haspopup="true" aria-expanded={shopOpen}
+              onClick={() => setShopOpen(v => !v)}
+            >
+              Create yours
+              <span className={"text-xs transition-transform " +
+                               (shopOpen ? "rotate-180" : "")}>&#9662;</span>
+            </button>
+            {shopOpen && (
+              <div className="absolute left-0 top-full mt-2 w-56 rounded-lg
+                              border border-ink/10 bg-paper shadow-sheet z-50 py-2">
+                {[
+                  { to: "/create?product=sports", label: "Sports Line Art",
+                    note: "The main event" },
+                  { to: "/create?product=city", label: "City Maps",
+                    note: "Any place on earth" },
+                  { to: "/create?product=custom", label: "Custom",
+                    note: "Bring us your idea" },
+                ].map(p => (
+                  <Link key={p.label} to={p.to}
+                        onClick={() => setShopOpen(false)}
+                        className="block px-4 py-2 hover:bg-ink/5">
+                    <div className="font-semibold">{p.label}</div>
+                    <div className="caption">{p.note}</div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
           <Link to="/contact" className="font-semibold hover:underline underline-offset-4">
             Contact
           </Link>
