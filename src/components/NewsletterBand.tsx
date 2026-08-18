@@ -25,7 +25,8 @@ export default function NewsletterBand() {
         </p>
         {state === "done" ? (
           <div className="mt-6 font-mono text-sm text-ink">
-            You&rsquo;re on the list. Talk soon.
+            You&rsquo;re on the list. Take 10% off your first piece with
+            code <strong>WELCOME10</strong> at checkout.
           </div>
         ) : (
           <div className="mt-6 flex gap-3 justify-center flex-wrap">
