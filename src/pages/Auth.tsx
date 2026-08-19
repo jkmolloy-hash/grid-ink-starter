@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import Seo from "@/components/Seo";
 
 export default function Auth() {
   const nav = useNavigate();
@@ -27,6 +28,7 @@ export default function Auth() {
 
   return (
     <div className="max-w-md mx-auto px-5 py-16">
+      <Seo title="Sign in — Grid & Ink Co." description="Sign in to your Grid & Ink Co. account to follow your piece from proof to shipped." path="/auth" noindex />
       <div className="bg-paper rounded-lg shadow-sheet border border-ink/10 p-8">
         <div className="caption">Grid &amp; Ink account</div>
         <h1 className="text-2xl font-extrabold mt-1">

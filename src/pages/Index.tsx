@@ -4,12 +4,42 @@ import HeroCarousel from "@/components/HeroCarousel";
 import CategoryTiles from "@/components/CategoryTiles";
 import NewsletterBand from "@/components/NewsletterBand";
 import { NibMark, PenRule } from "@/components/NibMark";
+import Seo from "@/components/Seo";
 
 export default function Index() {
   const money = (c: number) =>
     (c / 100).toLocaleString("en-US", { style: "currency", currency: "USD" });
   return (
     <div>
+      <Seo
+        title="Grid & Ink Co. — Hand-Plotted Varsity Portraits & City Maps"
+        description="Your photo drawn as one continuous pen line on archival paper. Hand-plotted varsity portraits and custom city maps — $98, shipping included."
+        path="/"
+      >
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            itemListElement: Object.values(PRODUCTS).map((p, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              item: {
+                "@type": "Product",
+                name: p.name,
+                description: p.blurb,
+                brand: { "@type": "Brand", name: "Grid & Ink Co." },
+                offers: {
+                  "@type": "Offer",
+                  price: (p.priceCents / 100).toFixed(2),
+                  priceCurrency: "USD",
+                  availability: "https://schema.org/InStock",
+                  url: "https://www.gridandinkco.com/create",
+                },
+              },
+            })),
+          })}
+        </script>
+      </Seo>
       <HeroCarousel />
       <CategoryTiles />
 
