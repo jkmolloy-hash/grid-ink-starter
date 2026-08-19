@@ -162,9 +162,15 @@ export default function HeroCarousel() {
                               (s.tone === "dark" ? "!text-paper/60" : "")}>
                 {s.kicker}
               </div>
-              <h2 className="font-display text-3xl sm:text-5xl font-bold leading-[1.05] mt-2">
-                {s.head[0]}<br />{s.head[1]}
-              </h2>
+              {i === 0 ? (
+                <h1 className="font-display text-3xl sm:text-5xl font-bold leading-[1.05] mt-2">
+                  {s.head[0]}<br />{s.head[1]}
+                </h1>
+              ) : (
+                <h2 className="font-display text-3xl sm:text-5xl font-bold leading-[1.05] mt-2">
+                  {s.head[0]}<br />{s.head[1]}
+                </h2>
+              )}
               {s.sub && (
                 <p className={"mt-3 max-w-xl text-base sm:text-lg " +
                               (s.tone === "dark"
