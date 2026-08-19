@@ -3,6 +3,7 @@
    plain words, and a short form. Individual team pages stay unlisted. */
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Seo from "@/components/Seo";
 
 export default function Teams() {
   const [team, setTeam] = useState("");
@@ -36,6 +37,11 @@ export default function Teams() {
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-14">
+      <Seo
+        title="Team Fundraising Line Art — Grid & Ink Co."
+        description="Hand-plotted team posters every family wants, with 20% back to the team. Start a team run with Grid & Ink Co."
+        path="/teams"
+      />
       <div className="caption">Grid &amp; Ink Co. &middot; for teams</div>
       <h1 className="font-display text-3xl font-bold mt-1">
         A team piece every family wants &mdash; and the team earns 20%

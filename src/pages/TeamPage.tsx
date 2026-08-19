@@ -8,6 +8,7 @@ import { Link, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@/App";
 import { TEAM_PRODUCT } from "@/config";
+import Seo from "@/components/Seo";
 
 type TeamPageRow = {
   slug: string; title: string; subtitle: string | null;
@@ -43,14 +44,8 @@ export default function TeamPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
-  // Team pages are unlisted: ask search engines to stay out.
-  useEffect(() => {
-    const m = document.createElement("meta");
-    m.name = "robots";
-    m.content = "noindex, nofollow";
-    document.head.appendChild(m);
-    return () => { document.head.removeChild(m); };
-  }, []);
+  // Team pages are unlisted — the Seo component sets noindex below.
+
 
   useEffect(() => {
     (async () => {
@@ -126,6 +121,31 @@ export default function TeamPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-5 py-12">
+      <Seo
+        title={`${page.title} — Team Piece | Grid & Ink Co.`}
+        description={page.subtitle ?? `Hand-plotted ${page.title} team line art on archival paper, framed and shipped.`}
+        path={`/team/${page.slug}`}
+        noindex
+      >
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: `${TEAM_PRODUCT.name} — ${page.title}`,
+            description: page.subtitle ?? `Hand-plotted ${page.title} team line art on archival paper.`,
+            image: page.art_url,
+            brand: { "@type": "Brand", name: "Grid & Ink Co." },
+            offers: {
+              "@type": "Offer",
+              price: (page.price_cents / 100).toFixed(2),
+              priceCurrency: "USD",
+              availability: page.active
+                ? "https://schema.org/InStock"
+                : "https://schema.org/SoldOut",
+            },
+          })}
+        </script>
+      </Seo>
       <div className="caption">Team piece &middot; one of one, plotted to order</div>
       <h1 className="font-display text-3xl font-bold mt-1">{page.title}</h1>
       {page.subtitle && <p className="mt-2 text-ink/70">{page.subtitle}</p>}
