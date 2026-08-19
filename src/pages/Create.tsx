@@ -6,6 +6,7 @@ import { checkPhoto, type PhotoVerdict } from "@/lib/photocheck";
 import SchoolPicker, { type SchoolPick } from "@/components/SchoolPicker";
 import MapPicker, { type MapFrame } from "@/components/MapPicker";
 import { PRODUCTS, TURNAROUND, type ProductKey, BRAND } from "@/config";
+import Seo from "@/components/Seo";
 
 /* One page, two flows:
    sports — upload a photo, see the one-line drawing live, checkout.
@@ -220,6 +221,11 @@ export default function Create() {
 
   return (
     <div className="max-w-6xl mx-auto px-5 py-12 grid lg:grid-cols-[1fr_380px] gap-10">
+      <Seo
+        title="Create Your Hand-Plotted Piece — Grid & Ink Co."
+        description="Upload a photo or pick a city, choose inks and layout, and we plot your one-of-one line art on archival paper. $98, shipping included."
+        path="/create"
+      />
       {/* LEFT — the sheet */}
       <div className="flex flex-col items-center">
         {isPhoto ? (
