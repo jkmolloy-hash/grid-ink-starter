@@ -43,14 +43,8 @@ export default function TeamPage() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
-  // Team pages are unlisted: ask search engines to stay out.
-  useEffect(() => {
-    const m = document.createElement("meta");
-    m.name = "robots";
-    m.content = "noindex, nofollow";
-    document.head.appendChild(m);
-    return () => { document.head.removeChild(m); };
-  }, []);
+  // Team pages are unlisted — the Seo component sets noindex below.
+
 
   useEffect(() => {
     (async () => {
